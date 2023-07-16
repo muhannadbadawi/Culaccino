@@ -8,7 +8,6 @@ const Customer = () => {
     const navigation = useNavigation();
 
     const [data, setData] = useState([])
-    const [loading, setLoading] = useState(true)
     const [value, setValue] = useState('');
 
     const logoutCusomer = () => {
@@ -29,6 +28,7 @@ const Customer = () => {
     AsyncStorage.getItem("name").then((value) => {
         setValue(value);
     })
+    console.log(value)
     return (
         <View>
             <ScrollView style={[styles.scrollview]}>

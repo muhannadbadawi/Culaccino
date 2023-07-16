@@ -37,6 +37,8 @@ const Register = () => {
           // Handle the response data
           console.log({ name });
           console.log(responseData);
+          navigation.navigate("Login")
+
         })
         .catch(error => {
           // Handle any errors
