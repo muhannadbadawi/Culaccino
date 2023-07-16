@@ -1,0 +1,19 @@
+{
+  "name": "culaccinoserver",
+  "version": "1.0.0",
+  "description": "Culaccino Backend",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app"
+  },
+  "author": "Muhannad Badawi",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "joi": "^17.9.2",
+    "mongoose": "^7.3.4"
+  },
+  "devDependencies": {
+    "nodemon": "3.0.1"
+  }
+}
