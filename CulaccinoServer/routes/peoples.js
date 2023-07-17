@@ -1,16 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
-const { People } = require('../models/People')
+const { People } = require('../models/People');
+const { default: mongoose } = require("mongoose");
 
 
-
+/**
+ * @desc Get All People
+ * @route /api/people/getAll
+ * @method GET
+ */
 router.get("/getAll", async (req, res) => {
     const peopleList = await People.find();
     res.status(200).json(peopleList);
 
 })
 
+
+
+/**
+ * @desc Delete person
+ * @route /api/people/:id
+ * @method DELETE
+ */
 router.delete("/:id", async (req, res) => {
     try {
         const person = await People.findById(req.params.id);
@@ -28,51 +40,70 @@ router.delete("/:id", async (req, res) => {
 })
 
 
+/**
+ * @desc get person without password
+ * @route /api/people
+ * @method POST
+ */
+// router.post("/getPerson", async (req, res) => {
 
-router.get("/getById/:id", async (req, res) => {
+
+//     try {
+//         const peopleList = await People.find();
+//         foundIt = "false";
+//         peopleList.forEach(element => {
+//             if (element.email == req.body.email && element.password == req.body.password) {
+//                 foundIt = "true";
+//                 console.log(foundIt)
+//                 const person = new People(
+//                     {
+//                         id:element._id,
+//                         name: element.name,
+//                         email: element.email
+//                     }
+//                 );   
+//                 return res.status(200).json(person)
+//             }
+//             else {
+//                 console.log("person not found")
+//             }
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json({ message: "Something went wrong" });
+//     }
+// })
+router.post("/getPerson", async (req, res) => {
+    const getPerson = {
+        id: "",
+        name: "",
+        email: ""
+    }
     try {
-        const user = await People.findById(req.params.id);
-        if (user) {
-            
-            res.status(200).json(user);
+        const person = await People.findOne(req.body);
+        if (person) {
+            getPerson.id = person._id
+            getPerson.name = person.name
+            getPerson.email = person.email
+            console.log(req.body)
+            res.json(getPerson);
         } else {
-            res.status(404).json({ message: "Not found" });
+            console.log({ request })
+            res.status(404).json({error:'Person not found'});
         }
     } catch (error) {
-        console.log("the error is " + error);
-        res.status(500).json({ message: "Something went wrong" });
+        res.status(404).json({error:"Internal Server Error"});
     }
 })
 
-router.post("/getPerson", async (req, res) => {
 
 
-    try {
-        const peopleList = await People.find();
-        foundIt = "false";
-        peopleList.forEach(element => {
-            if (element.email == req.body.email && element.password == req.body.password) {
-                foundIt = "true";
-                console.log(foundIt)
-                const person = new People(
-                    {
-                        id:element._id,
-                        name: element.name,
-                        email: element.email
-                    }
-                );   
-                return res.status(200).json(person)
-            }
-            else {
-                console.log("person not found")
-            }
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Something went wrong" });
-    }
-})
 
+/**
+ * @desc Add New person
+ * @route /api/people
+ * @method POST
+ */
 router.post("/", async (req, res) => {
     const { error } = validateCreatePerson(req.body);
     if (error) {
