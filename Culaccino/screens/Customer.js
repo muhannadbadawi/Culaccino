@@ -4,38 +4,69 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from "@react-navigation/native"
 
-const Customer = () => {
-    const navigation = useNavigation();
-
-    const [data, setData] = useState([])
-    const [value, setValue] = useState('');
-
-    const logoutCusomer = () => {
-        AsyncStorage.clear()
-        navigation.navigate("Login")
+async function removeItemFromStorage(itemName) {
+    try {
+        await AsyncStorage.removeItem(itemName);
+        console.log(`Successfully removed ${itemName} from AsyncStorage.`);
+    } catch (error) {
+        console.error(`Error removing ${itemName} from AsyncStorage:`, error);
     }
+}
+// async function getItemFromStorage(itemName) {
+//     try {
+//         const itemValue = await AsyncStorage.getItem(itemName);
+//         if (itemValue !== null) {
+//             console.log(`Value of ${itemName} in AsyncStorage: ${itemValue}`);
+//             return itemValue;
+//         } else {
+//             console.log(`No value found for ${itemName} in AsyncStorage.`);
+//             return null
+//         }
+//     } catch (error) {
+//         console.error(`Error retrieving ${itemName} from AsyncStorage:`, error);
+//         return null
+//     }
+// }
+
+
+const Customer = ({route}) => {
+    const navigation = useNavigation();
+    const [id, setId] = useState('');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
 
     const myurl = "http://192.168.100.5:5000/api/people/g"
+
+    async function getItemFromStorage(itemName) {
+        try {
+          const itemValue = await AsyncStorage.getItem(itemName);
+          if (itemValue !== null) {
+            setName(itemValue);
+            console.log(`Value of ${itemName} in AsyncStorage: ${itemValue}`);
+          } else {
+            console.log(`No value found for ${itemName} in AsyncStorage.`);
+          }
+        } catch (error) {
+          console.error(`Error retrieving ${itemName} from AsyncStorage:`, error);
+        }
+      }
+
     useEffect(() => {
         fetch(myurl)
             .then((response) => response.json())
             .then((json) => setData(json))
-            .then(() => console.log(data))
             .catch((error) => console.log(error))
-            .finally(() => setLoading(false))
+            .finally(()=>getItemFromStorage("name"))
     }, [])
-
-    AsyncStorage.getItem("name").then((value) => {
-        setValue(value);
-    })
-    console.log(value)
+    const logoutCusomer = () => {
+        removeItemFromStorage("name")
+        navigation.navigate("Login")
+    }
+    //START
     return (
-        <View>
+        <SafeAreaView>
             <ScrollView style={[styles.scrollview]}>
-
-                <Text>saas</Text>
-                <Text>saas</Text>
-                <Text style={{ fontSize: 30, fontWeight: "bold", color: "#fff" }}>{value}</Text>
+                <Text style={{ fontSize: 30, fontWeight: "bold", color: "#fff" }}>{route.params.paramKey}</Text>
                 <Pressable style={styles.logoutButton} onPress={logoutCusomer}>
 
                     <Text style={styles.text}>Logout</Text>
@@ -47,7 +78,7 @@ const Customer = () => {
                 style={[styles.fixed, styles.containter, { zIndex: -1 }]}
                 source={require('./../assets/img2.jpg')}
             />
-        </View>
+        </SafeAreaView>
     )
 }
 const styles = StyleSheet.create({
@@ -88,21 +119,6 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         letterSpacing: 0.25,
         color: 'black',
-    },
-
-    // container: {
-    //     flex: 1,
-    //     justifyContent: 'center',
-
-    // },
-    // container1: {
-
-    //     width: '100%',
-    //     height: '100%',
-    //     borderRadius: 50,
-    //     backgroundColor: "#555",
-    //     padding: 30,
-    //     opacity: 0.9,
-    // },
+    }
 })
 export default Customer

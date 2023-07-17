@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const peoplePath=require('./routes/peoples') 
+const itemPath=require('./routes/items') 
+
 
 // Create Express app
 const app = express();
@@ -21,6 +23,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/culaccinoDB', {
 // Define your routes and middleware
 // ...
 app.use("/api/people",peoplePath)
+app.use("/api/item",itemPath)
 // Start the Express server
 app.listen(5000, () => {
   console.log('Server is running on port 5000');

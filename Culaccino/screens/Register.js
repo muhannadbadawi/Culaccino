@@ -35,14 +35,11 @@ const Register = () => {
         .then(response => response.json())
         .then(responseData => {
           // Handle the response data
-          console.log({ name });
-          console.log(responseData);
           navigation.navigate("Login")
 
         })
         .catch(error => {
           // Handle any errors
-          console.log({ name });
           console.error(error);
         });
     } else {

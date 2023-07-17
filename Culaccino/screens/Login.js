@@ -7,22 +7,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const baseUrl = "http://192.168.100.5:5000/api/people/y";
 const Login = () => {
+  
+
   const navigation = useNavigation();
 
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [data, setData] = useState([])
-  const [value, setValue] = useState('');
 
   const postData = {
     email: email,
     password: password
   };
-  AsyncStorage.getItem("name").then((value) => {
-    setValue(value);
-  })
-  console.log(value)
+
 
   const loginCusomer = () => {
     console.log("Loading ....");
@@ -35,29 +33,28 @@ const Login = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Add any other headers required by your API
       },
       body: JSON.stringify(postData) // Convert the data to JSON string
     })
       .then(response => response.json())
       .then(responseData => {
-        // Handle the response data
-        console.log(responseData);
         setData(responseData)
-        AsyncStorage.setItem("name", data.name);
-        AsyncStorage.setItem("id", data._id);
-        AsyncStorage.setItem("email", data.email);
       })
+      .then(
+        AsyncStorage.setItem("id", data._id),
+        AsyncStorage.setItem("name", data.name),
+        AsyncStorage.setItem("email", data.email)
+      )
       .catch(error => {
         // Handle any errors
         console.error(error);
       })
-      .finally(() => navigation.navigate("Customer"))
+      .finally(() => navigation.navigate("Customer",{paramKey:data.name}))
   }
-  //
+
+  //START
   return (
     <ImageBackground source={require('./../assets/img3.jpg')} resizeMode="cover" style={styles.container}>
-      <Text>{value}</Text>
       <Text style={styles.UsernameLable}>Email</Text>
       <TextInput keyboardType='email-address' style={styles.inputUsername} onChangeText={newText => setEmail(newText.toString())}></TextInput>
 

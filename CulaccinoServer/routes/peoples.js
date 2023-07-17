@@ -2,11 +2,10 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const { People } = require('../models/People')
-const { Loogin } = require('../models/Login')
 
 
 
-router.get("/g", async (req, res) => {
+router.get("/getAll", async (req, res) => {
     const peopleList = await People.find();
     res.status(200).json(peopleList);
 
@@ -30,7 +29,7 @@ router.delete("/:id", async (req, res) => {
 
 
 
-router.get("/x/:id", async (req, res) => {
+router.get("/getById/:id", async (req, res) => {
     try {
         const user = await People.findById(req.params.id);
         if (user) {
@@ -45,7 +44,7 @@ router.get("/x/:id", async (req, res) => {
     }
 })
 
-router.post("/y", async (req, res) => {
+router.post("/getPerson", async (req, res) => {
 
 
     try {
@@ -95,25 +94,6 @@ router.post("/", async (req, res) => {
         res.status(500).json({ message: "Something went wrong" });
     }
 });
-
-router.post("/login", async (req, res) => {
-    const { error } = validateCreatePerson(req.body);
-    if (error) {
-        return res.status(400).json(error.details[0].message)
-    }
-
-    try {
-        const person = await People.findById(req.params.id);
-        if (person && person.email == req.params.email && person.password == req.params.password) {
-            res.status(201).json(person);
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Something went wrong" });
-    }
-});
-
-
 
 function validateCreatePerson(obj) {
     const schema = Joi.object({
