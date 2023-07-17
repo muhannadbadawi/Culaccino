@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import { View, Text, FlatList, Button, Dimensions, ImageBackground, TextInput, StyleSheet, Pressable, Image, ScrollView } from 'react-native'
+import { View, Alert, Text, FlatList, Button, Dimensions, ImageBackground, TextInput, StyleSheet, Pressable, Image, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { useNavigation } from "@react-navigation/native"
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -55,8 +55,25 @@ function ProfileScreen() {
   const [emailShare, setEmailShare] = useState('');
   const [nameShare, setNameShare] = useState('');
   const [idShare, setIdShare] = useState('');
+  useEffect(() => {
+    AsyncStorage.getItem('name')
+      .then((itemValue) => {
+        setNameShare(itemValue);
+      })
+      .catch((error) => {
+        console.error('Error retrieving item:', error);
+      });
+      AsyncStorage.getItem('email')
+      .then((itemValue) => {
+        setEmailShare(itemValue);
+      })
+      .catch((error) => {
+        console.error('Error retrieving item:', error);
+      });
+  }, []);
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>{nameShare}</Text>
       <Text>{emailShare}</Text>
     </View>
   );
@@ -67,13 +84,22 @@ function Login() {
   const navigation = useNavigation();
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [value, setValue] = useState('');
 
   const postData = {
     email: email,
     password: password
   };
 
-
+  useEffect(() => {
+    AsyncStorage.getItem('name')
+      .then((itemValue) => {
+        setValue(itemValue);
+      })
+      .catch((error) => {
+        console.error('Error retrieving item:', error);
+      });
+  }, []);
   const loginCusomer = () => {
     console.log("Loading ....");
     const postData = {
@@ -92,17 +118,23 @@ function Login() {
       .then(response => response.json())
       .then(responseData => {
         // Handle the response data
-        console.log(responseData);        
-        // AsyncStorage.setItem("name", data.name);
-        // AsyncStorage.setItem("id", data._id);
-        // AsyncStorage.setItem("email", data.email);
-        navigation.navigate("Customer")
+        console.log("rexxx " + responseData.name);
+
+        if (responseData.name != undefined) {
+          AsyncStorage.setItem("name", responseData.name);
+          AsyncStorage.setItem("id", responseData._id);
+          AsyncStorage.setItem("email", responseData.email);
+          navigation.navigate("Customer")
+        }
+        else {
+          Alert.alert("Wrong email or password")
+        }
       })
       .catch(error => {
         // Handle any errors
         console.error(error);
       })
-      
+
   }
 
   return (
@@ -123,6 +155,14 @@ function Login() {
         <Text style={loginStyles.text}>Login</Text>
 
       </Pressable>
+      <Text>{value}</Text>
+      <Text>{value}</Text>
+      <Text>{value}</Text>
+      <Text>{value}</Text>
+      <Text>{value}</Text>
+      <Text>{value}</Text>
+      <Text>{value}</Text>
+      <Text>{value}</Text>
     </ImageBackground>
   );
 }
@@ -212,23 +252,58 @@ function Customer() {
 
   const [data, setData] = useState([])
   const [value, setValue] = useState('');
-
+  
   const LogoutCusomer = () => {
-    // AsyncStorage.clear()
-    navigation.navigate("Login")
+   
+    useEffect(() => {
+      // Function to remove item from AsyncStorage
+      const removeItemFromStorage = async () => {
+        try {
+          await AsyncStorage.removeItem('name');
+          console.log('Item removed from AsyncStorage.');
+        } catch (error) {
+          console.error('Error removing item from AsyncStorage:', error);
+        }
+      };
+  
+      // Call the function to remove the item
+      removeItemFromStorage();
+    }, []);    
+    useEffect(() => {
+      // Function to remove item from AsyncStorage
+      const removeItemFromStorage = async () => {
+        try {
+          await AsyncStorage.removeItem('email');
+          console.log('Item removed from AsyncStorage.');
+        } catch (error) {
+          console.error('Error removing item from AsyncStorage:', error);
+        }
+      };
+  
+      // Call the function to remove the item
+      removeItemFromStorage();
+    }, []);
+    useEffect(() => {
+      // Function to remove item from AsyncStorage
+      const removeItemFromStorage = async () => {
+        try {
+          await AsyncStorage.removeItem('id');
+          console.log('Item removed from AsyncStorage.');
+        } catch (error) {
+          console.error('Error removing item from AsyncStorage:', error);
+        }
+      };
+  
+      // Call the function to remove the item
+      removeItemFromStorage();
+    }, []);
+  
+
+  
+      navigation.navigate("Login")
   }
+ 
 
-  useEffect(() => {
-    fetch(baseUrl + "people/g")
-      .then((response) => response.json())
-      .then((json) => setData(json))
-      .then(() => console.log(data))
-      .catch((error) => console.log(error))
-  }, [])
-
-  // AsyncStorage.getItem("name").then((value) => {
-  //   setValue(value);
-  // })
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -254,12 +329,13 @@ function Customer() {
         tabBarInactiveTintColor: 'gray',
       })}
     >
+      
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Cart" component={CartScreen} />
       <Tab.Screen name="Logout" component={LogoutCusomer} />
-
     </Tab.Navigator>
+
   )
 }
 //End Customer
@@ -276,7 +352,6 @@ export default function App() {
           <Stack.Screen name='Login' component={Login} />
           <Stack.Screen name='Register' component={Register} />
           <Stack.Screen name='Customer' component={Customer} />
-
         </Stack.Group>
       </Stack.Navigator>
       <StatusBar style='dark' />

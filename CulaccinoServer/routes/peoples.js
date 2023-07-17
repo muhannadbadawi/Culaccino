@@ -78,23 +78,23 @@ router.post("/getPerson", async (req, res) => {
         id: "",
         name: "",
         email: ""
-    }
+    };
     try {
         const person = await People.findOne(req.body);
+
         if (person) {
-            getPerson.id = person._id
-            getPerson.name = person.name
-            getPerson.email = person.email
-            console.log(req.body)
+            getPerson.id = person._id;
+            getPerson.name = person.name;
+            getPerson.email = person.email;
+            console.log(req.body);
             res.json(getPerson);
         } else {
-            console.log({ request })
-            res.status(404).json({error:'Person not found'});
+            res.status(404).json({ error: 'Person not found' });
         }
     } catch (error) {
-        res.status(404).json({error:"Internal Server Error"});
+        res.status(500).json({ error: "Internal Server Error" });
     }
-})
+});
 
 
 
