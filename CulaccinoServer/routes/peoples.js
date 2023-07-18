@@ -77,6 +77,7 @@ router.post("/getPerson", async (req, res) => {
     const getPerson = {
         id: "",
         name: "",
+        phone:"",
         email: ""
     };
     try {
@@ -85,6 +86,7 @@ router.post("/getPerson", async (req, res) => {
         if (person) {
             getPerson.id = person._id;
             getPerson.name = person.name;
+            getPerson.phone=person.phone;
             getPerson.email = person.email;
             console.log(req.body);
             res.json(getPerson);
