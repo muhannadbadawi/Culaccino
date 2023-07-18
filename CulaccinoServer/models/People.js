@@ -15,6 +15,13 @@ const PeopleSchema =new mongoose.Schema({
         minlength:6,
         maxlength:200
     },
+    phone:{
+        type:String,
+        required:true,
+        trim:true,
+        minlength:6,
+        maxlength:20
+    },
     password:{
         type:String,
         required:true,

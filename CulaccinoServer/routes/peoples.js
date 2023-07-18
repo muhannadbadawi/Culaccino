@@ -114,6 +114,7 @@ router.post("/", async (req, res) => {
         const person = new People(
             {
                 name: req.body.name,
+                phone:req.body.phone,
                 email: req.body.email,
                 password: req.body.password
             }
@@ -129,6 +130,7 @@ router.post("/", async (req, res) => {
 function validateCreatePerson(obj) {
     const schema = Joi.object({
         name: Joi.string().trim().min(3).max(200).required(),
+        phone: Joi.string().trim().min(6).max(20).required(),
         email: Joi.string().trim().min(6).max(200).required(),
         password: Joi.string().trim().min(8).max(200).required(),
     });

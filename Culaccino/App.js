@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const baseUrl = "http://192.168.100.5:5000/api/";
 const Tab = createBottomTabNavigator();
@@ -25,30 +26,43 @@ function HomeScreen() {
   useEffect(() => {
     fetch(baseUrl + "item/getAll").then((response) => response.json()).then((json) => setData(json)).catch((error) => alert(error))
   })
+  // style={homeStyles.container}
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+
+    <SafeAreaView>
       <View>
         <Text>Menu</Text>
-        <FlatList
+        <Text style={homeStyles.titleName}>Name</Text>
+        <Text style={homeStyles.titlePrice}>Price</Text>
+        
+        <FlatList style={homeStyles.listName}
           data={data}
-          keyExtractor={({ id }, index) => id}
+          keyExtractor={({ id }) => id}
           renderItem={({ item }) => (
             <Text>
               {item.name},
+            </Text>
+          )}
+        />
+        <FlatList style={homeStyles.listPrice}
+          data={data}
+          keyExtractor={({ id }) => id}
+          renderItem={({ item }) => (
+            <Text>
               {item.price}JD
             </Text>
           )}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 function CartScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <SafeAreaView>
       <Text>Cart!</Text>
-    </View>
+    </SafeAreaView>
   );
 }
 function ProfileScreen() {
@@ -63,19 +77,32 @@ function ProfileScreen() {
       .catch((error) => {
         console.error('Error retrieving item:', error);
       });
-      AsyncStorage.getItem('email')
+    AsyncStorage.getItem('email')
       .then((itemValue) => {
         setEmailShare(itemValue);
       })
       .catch((error) => {
         console.error('Error retrieving item:', error);
       });
+    AsyncStorage.getItem('id')
+      .then((itemValue) => {
+        setIdShare(itemValue);
+      })
+      .catch((error) => {
+        console.error('Error retrieving item:', error);
+      });
   }, []);
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>{nameShare}</Text>
-      <Text>{emailShare}</Text>
-    </View>
+    <ImageBackground source={require('./assets/img1.jpg')} resizeMode="cover" style={singupStyles.container}>
+      <Pressable style={singupStyles.container1}>
+        <Text style={singupStyles.Lable}>Name</Text>
+        <TextInput keyboardType='default' style={singupStyles.Input} onChangeText={newText => setNameShare(newText)}>{nameShare}</TextInput>
+
+        <Text style={singupStyles.Lable}>Email</Text>
+        <TextInput keyboardType='email-address' style={singupStyles.Input} onChangeText={newText => setEmailShare(newText.toString())}>{emailShare}</TextInput>
+      </Pressable>
+
+    </ImageBackground>
   );
 }
 
@@ -84,22 +111,12 @@ function Login() {
   const navigation = useNavigation();
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
-  const [value, setValue] = useState('');
 
   const postData = {
     email: email,
     password: password
   };
 
-  useEffect(() => {
-    AsyncStorage.getItem('name')
-      .then((itemValue) => {
-        setValue(itemValue);
-      })
-      .catch((error) => {
-        console.error('Error retrieving item:', error);
-      });
-  }, []);
   const loginCusomer = () => {
     console.log("Loading ....");
     const postData = {
@@ -118,12 +135,11 @@ function Login() {
       .then(response => response.json())
       .then(responseData => {
         // Handle the response data
-        console.log("rexxx " + responseData.name);
-
         if (responseData.name != undefined) {
           AsyncStorage.setItem("name", responseData.name);
-          AsyncStorage.setItem("id", responseData._id);
+          AsyncStorage.setItem("id", responseData.id);
           AsyncStorage.setItem("email", responseData.email);
+          console.log("Login successful");
           navigation.navigate("Customer")
         }
         else {
@@ -155,14 +171,6 @@ function Login() {
         <Text style={loginStyles.text}>Login</Text>
 
       </Pressable>
-      <Text>{value}</Text>
-      <Text>{value}</Text>
-      <Text>{value}</Text>
-      <Text>{value}</Text>
-      <Text>{value}</Text>
-      <Text>{value}</Text>
-      <Text>{value}</Text>
-      <Text>{value}</Text>
     </ImageBackground>
   );
 }
@@ -217,6 +225,9 @@ function Register() {
         <Text style={singupStyles.Lable}>Name</Text>
         <TextInput keyboardType='default' style={singupStyles.Input} onChangeText={newText => setName(newText)}></TextInput>
 
+        <Text style={singupStyles.Lable}>Phone Number</Text>
+        <TextInput keyboardType='phone-pad' style={singupStyles.Input} onChangeText={newText => setEmail(newText.toString())}></TextInput>
+
         <Text style={singupStyles.Lable}>Email</Text>
         <TextInput keyboardType='email-address' style={singupStyles.Input} onChangeText={newText => setEmail(newText.toString())}></TextInput>
 
@@ -252,9 +263,9 @@ function Customer() {
 
   const [data, setData] = useState([])
   const [value, setValue] = useState('');
-  
+
   const LogoutCusomer = () => {
-   
+
     useEffect(() => {
       // Function to remove item from AsyncStorage
       const removeItemFromStorage = async () => {
@@ -265,10 +276,10 @@ function Customer() {
           console.error('Error removing item from AsyncStorage:', error);
         }
       };
-  
+
       // Call the function to remove the item
       removeItemFromStorage();
-    }, []);    
+    }, []);
     useEffect(() => {
       // Function to remove item from AsyncStorage
       const removeItemFromStorage = async () => {
@@ -279,7 +290,7 @@ function Customer() {
           console.error('Error removing item from AsyncStorage:', error);
         }
       };
-  
+
       // Call the function to remove the item
       removeItemFromStorage();
     }, []);
@@ -293,16 +304,16 @@ function Customer() {
           console.error('Error removing item from AsyncStorage:', error);
         }
       };
-  
+
       // Call the function to remove the item
       removeItemFromStorage();
     }, []);
-  
 
-  
-      navigation.navigate("Login")
+
+
+    navigation.navigate("Login")
   }
- 
+
 
   return (
     <Tab.Navigator
@@ -311,9 +322,7 @@ function Customer() {
           let iconName;
 
           if (route.name === 'Home') {
-            iconName = focused
-              ? 'home'
-              : 'home-outline';
+            iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           } else if (route.name === 'Cart') {
@@ -322,19 +331,18 @@ function Customer() {
             iconName = focused ? 'log-out' : 'log-out-outline';
           }
 
-          // You can return any component that you like here!
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: 'tomato',
         tabBarInactiveTintColor: 'gray',
       })}
     >
-      
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Cart" component={CartScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Cart" component={CartScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Logout" component={LogoutCusomer} />
     </Tab.Navigator>
+
 
   )
 }
@@ -366,10 +374,10 @@ const singupStyles = StyleSheet.create({
     flex: 1,
   },
   container1: {
-    top: 135,
-    left: 5,
+    top: "7%",
+    left: "2%",
     width: '95%',
-    height: '70%',
+    height: '82%',
     borderRadius: 50,
     backgroundColor: "#555",
     padding: 30,
@@ -377,18 +385,19 @@ const singupStyles = StyleSheet.create({
   },
   Lable: {
     fontSize: 18,
+    color:"#fff",
     textAlign: 'left',
     marginBottom: 15,
     marginLeft: 15,
   },
   Input: {
-    backgroundColor: '#fff',
-    width: 320,
-    height: 50,
+    backgroundColor: '#ffd',
+    width: "100%",
+    height: "7%",
     borderRadius: 20,
-    padding: 10,
+    padding: "5%",
     fontSize: 20,
-    marginBottom: 15,
+    marginBottom: "5%",
   },
   Button: {
     margin: 15,
@@ -532,10 +541,38 @@ const homeStyles = StyleSheet.create({
     flex: 1,
     paddingTop: 22,
   },
+  titleName:{
+    position:'relative',
+    top:"12%",
+    left:0
+  },
+  titlePrice:{
+    position:'relative',
+    top:"0%",
+    left:"50%"
+  },
+  listName:{
+    position:'relative',
+    top:"30%",
+    left:0
+  },
+  listPrice:{
+    position:'relative',
+    top:"0%",
+    left:"50%"
+  },
   item: {
     padding: 10,
     fontSize: 18,
     height: 44,
   },
 });
+const profileStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
 
+});
