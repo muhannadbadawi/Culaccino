@@ -1,5 +1,6 @@
 const { Order } = require('../models/Order');
 const { ItemsOrder } = require('../models/ItemsOrder');
+const { Menu } = require("../models/Menu")
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
@@ -26,6 +27,19 @@ router.get("/getAllItemsOrder", async (req, res) => {
     res.status(200).json(itemList);
 })
 
+async function getprice(id) {
+    try {
+        const item = await Menu.findById(id);
+        if (item) {
+            return item.price;
+        } else {
+            return 0;
+        }
+    } catch (error) {
+        console.log(error);
+        return 0;
+    }
+}
 
 /**
  * @desc Add New Order
@@ -33,16 +47,24 @@ router.get("/getAllItemsOrder", async (req, res) => {
  * @method POST
  */
 router.post("/", async (req, res) => {
-    try {
+    try {     
+        const list = req.body.items;
+        let totalPrice = 0; 
+        for (const element of list) {
+          const price = await getprice(element.itemId);
+          const totalPriceForItem = price * element.quantities;
+          totalPrice += totalPriceForItem;
+          console.log(totalPriceForItem);
+        }
         const newOrder = new Order(
             {
                 customerId: req.body.customerId,
-                totalPrice: 5,
+                totalPrice: totalPrice,
                 status: 0
             }
         )
             newOrder.save();
-            const list = req.body.items;
+
             list.forEach(element => {
                 const newItemsOrder = new ItemsOrder(
                     {
@@ -61,10 +83,10 @@ router.post("/", async (req, res) => {
         res.status(500).json({ message: "Something went wrong" });
     }
 });
-  
-  
-  
-  
+
+
+
+
 
 /**
  * @desc Update an Item
