@@ -1,4 +1,4 @@
-const { Item } = require('../models/Item')
+const { Menu } = require('../models/Menu')
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
@@ -10,7 +10,7 @@ const Joi = require("joi");
  * @method GET
  */
 router.get("/getAll", async (req, res) => {
-    const itemList = await Item.find();
+    const itemList = await Menu.find();
     res.status(200).json(itemList);
 
 })
@@ -23,7 +23,7 @@ router.get("/getAll", async (req, res) => {
  */
 router.post("/", async (req, res) => {
     try {
-        const item = new Item(
+        const item = new Menu(
             {
                 name: req.body.name,
                 price: req.body.price,
@@ -50,7 +50,7 @@ router.post("/", async (req, res) => {
  * @method PUT
  */
 router.put("/update/:id", async (req,res)=>{
-    const item = await Item.findByIdAndUpdate(req.params.id,{
+    const item = await Menu.findByIdAndUpdate(req.params.id,{
         $set:{
             name:req.body.name,
             price:req.body.price,

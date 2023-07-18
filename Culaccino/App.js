@@ -27,7 +27,7 @@ function HomeScreen() {
     price: 0
   };
   useEffect(() => {
-    fetch(baseUrl + "item/getAll").then((response) => response.json()).then((json) => setData(json)).catch((error) => alert(error))
+    fetch(baseUrl + "menu/getAll").then((response) => response.json()).then((json) => setData(json)).catch((error) => alert(error))
   })
 
 

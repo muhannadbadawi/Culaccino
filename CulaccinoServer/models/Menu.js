@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ItemSchema = new mongoose.Schema({
+const MenuSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -59,7 +59,7 @@ const ItemSchema = new mongoose.Schema({
     }
 );
 
-const Item = mongoose.model("Item", ItemSchema);
+const Menu = mongoose.model("Menu", MenuSchema);
 module.exports = {
-    Item
+    Menu
 }
