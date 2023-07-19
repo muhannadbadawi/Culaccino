@@ -22,8 +22,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/culaccinoDB', {
     console.error('Error connecting to MongoDB:', error);
   });
 
-// Define your routes and middleware
-// ...
+
+
 app.use("/api/people",peoplePath)
 app.use("/api/menu",menuPath)
 app.use("/api/order",orderPath)
