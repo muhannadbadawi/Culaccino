@@ -11,32 +11,48 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.158:5000/api/";
 const Tab = createBottomTabNavigator();
 
 
 //Start HomeScreen
 function HomeScreen() {
   const [data, setData] = useState([])
+  const [cart, setCart] = useState([])
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
 
-
-  const getData = {
-    name: "",
-    price: 0
-  };
   useEffect(() => {
     fetch(baseUrl + "menu/getAll").then((response) => response.json()).then((json) => setData(json)).catch((error) => alert(error))
   })
 
-
-  const handlePress = (description) => {
-    console.log("Pressed:", description);
-    Alert.alert(description)
-    // Additional logic here
+  const handlePress = (d) => {
+    const myArray2 = [];
+  
+    const retrieveData = async (name) => {
+      try {
+        const jsonString = await AsyncStorage.getItem(name);
+        if (jsonString !== null) {
+          const parsedData = JSON.parse(jsonString); // Parse the string into an array
+          parsedData.push(d);
+          console.log(parsedData);
+          // Now you need to save the updated data back to AsyncStorage
+          await AsyncStorage.setItem(name, JSON.stringify(parsedData));
+        } else {
+          console.log('JSON data not found.');
+          myArray2.push(d);
+          console.log(myArray2);
+          // Save the data in myArray2 to AsyncStorage
+          await AsyncStorage.setItem(name, JSON.stringify(myArray2));
+        }
+      } catch (error) {
+        console.error('Error retrieving JSON data:', error);
+      }
+    };
+  
+    retrieveData("cartItems");
   };
-  // style={homeStyles.container}
+  
   return (
 
     <SafeAreaView>
@@ -48,7 +64,7 @@ function HomeScreen() {
             <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: "5%" }} />
             <FlatList
               data={data}
-              keyExtractor={({ id }) => id}
+              keyExtractor={({ idName }) => idName}
               renderItem={({ item }) => (
                 <TouchableOpacity onLongPress={() => handlePress(item.description)} style={{ flexDirection: 'row' }}>
                   <Text style={{ marginLeft: "2%", marginBottom: "15%", fontWeight: "500", fontSize: 20 }}>
@@ -65,11 +81,19 @@ function HomeScreen() {
             <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: "5%" }} />
             <FlatList
               data={data}
-              keyExtractor={({ id }) => id}
+              keyExtractor={({ idPrice }) => idPrice}
               renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => handlePress(item._id)} style={{ flexDirection: 'row' }}>
+                <TouchableOpacity style={{ flexDirection: 'row' }}>
                   <Text style={{ marginLeft: "5%", marginBottom: "15%", marginRight: "20%", fontWeight: "500", fontSize: 20 }}>{item.price} JD</Text>
-                  <Icon name="add-circle" size={24} color="tomato" />
+                  <TouchableOpacity onPress={() => handlePress(
+                    {
+                      id: item._id,
+                      name: item.name,
+                      price: item.price
+                    }
+                  )} style={{ flexDirection: 'row' }}>
+                    <Icon name="add-circle" size={30} color="tomato" />
+                  </TouchableOpacity>
                 </TouchableOpacity>
 
               )}
@@ -108,10 +132,44 @@ const homeStyles = StyleSheet.create({
 
 //Start CartScreen
 function CartScreen() {
-  return (
+  const [data, setData] = useState([]);
+  const [value, setValue] = useState();
+
+  useEffect(() => {
+    // Function to retrieve data from AsyncStorage
+    const getDataFromAsyncStorage = async () => {
+      try {
+        const jsonData = await AsyncStorage.getItem('cartItems');
+        console.log('jsonData:', jsonData);
+        setValue(1)
+        if (jsonData !== null) {
+          const parsedData = JSON.parse(jsonData);
+          console.log('parsedData:', parsedData);
+          setData(parsedData);
+        }
+      } catch (error) {
+        console.error('Error reading data from AsyncStorage:', error);
+      }
+    };
+
+    getDataFromAsyncStorage();
+  }, []);
+  
+
+  const renderItem = ({ item },value) => (
     <SafeAreaView>
-      <Text>Cart!</Text>
+      <Text onPress={()=>{console.log(data);}}>{item.name}</Text>
+      <Text>Price: $ {item.price}</Text>
+      <Text>quantities: {value}</Text>
     </SafeAreaView>
+  );
+
+  return (
+    <FlatList
+      data={data}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id}
+    />
   );
 }
 //End CartScreen
@@ -200,6 +258,14 @@ function Login() {
     email: email,
     password: password
   };
+  const removeData = async (name) => {
+    try {
+      await AsyncStorage.removeItem(name);
+      console.log('Data removed successfully.');
+    } catch (error) {
+      console.error('Error removing data:', error);
+    }
+  };
 
   const loginCusomer = () => {
     console.log("Loading ....");
@@ -224,6 +290,7 @@ function Login() {
           AsyncStorage.setItem("id", responseData.id);
           AsyncStorage.setItem("email", responseData.email);
           AsyncStorage.setItem("phone", responseData.phone);
+          removeData("cartItems");
           console.log("Login successful");
           navigation.navigate("Customer")
         }
@@ -243,10 +310,10 @@ function Login() {
 
       <SafeAreaView style={loginStyles.container}>
         <Text style={loginStyles.lable}>Email</Text>
-        <TextInput keyboardType='email-address' style={loginStyles.input} onChangeText={newText => setEmail(newText.toString())}></TextInput>
+        <TextInput keyboardType='email-address' style={loginStyles.input} onChangeText={newText => setEmail(newText.toString())}>Yousef@yahoo.com</TextInput>
 
         <Text style={loginStyles.lable}>Password</Text>
-        <TextInput secureTextEntry={true} keyboardType='visible-password' style={loginStyles.input} onChangeText={newText => setPassword(newText.toString())}></TextInput>
+        <TextInput secureTextEntry={true} keyboardType='visible-password' style={loginStyles.input} onChangeText={newText => setPassword(newText.toString())}>123</TextInput>
         <View style={loginStyles.buttonsBox}>
           <Pressable style={loginStyles.buttonContainer} onPress={() => navigation.navigate("Register")}  >
 
@@ -460,48 +527,19 @@ function Customer() {
   const [value, setValue] = useState('');
 
   const LogoutCusomer = () => {
-
     useEffect(() => {
-      // Function to remove item from AsyncStorage
-      const removeItemFromStorage = async () => {
+      const removeItemFromStorage = async (v) => {
         try {
-          await AsyncStorage.removeItem('name');
-          console.log('Item removed from AsyncStorage.');
+          await AsyncStorage.removeItem(v);
+          console.log(v + ' removed from AsyncStorage.');
         } catch (error) {
           console.error('Error removing item from AsyncStorage:', error);
         }
       };
-
-      // Call the function to remove the item
-      removeItemFromStorage();
-    }, []);
-    useEffect(() => {
-      // Function to remove item from AsyncStorage
-      const removeItemFromStorage = async () => {
-        try {
-          await AsyncStorage.removeItem('email');
-          console.log('Item removed from AsyncStorage.');
-        } catch (error) {
-          console.error('Error removing item from AsyncStorage:', error);
-        }
-      };
-
-      // Call the function to remove the item
-      removeItemFromStorage();
-    }, []);
-    useEffect(() => {
-      // Function to remove item from AsyncStorage
-      const removeItemFromStorage = async () => {
-        try {
-          await AsyncStorage.removeItem('id');
-          console.log('Item removed from AsyncStorage.');
-        } catch (error) {
-          console.error('Error removing item from AsyncStorage:', error);
-        }
-      };
-
-      // Call the function to remove the item
-      removeItemFromStorage();
+      removeItemFromStorage("id");
+      removeItemFromStorage("name");
+      removeItemFromStorage("email");
+      removeItemFromStorage("phone");
     }, []);
 
 

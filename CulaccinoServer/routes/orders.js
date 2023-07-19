@@ -7,6 +7,16 @@ const Joi = require("joi");
 
 
 /**
+ * @desc Get All Items Order
+ * @route /api/order/getAllItemsOrder
+ * @method GET
+ */
+router.get("/getAllItemsOrder", async (req, res) => {
+    const itemList = await ItemsOrder.find();
+    res.status(200).json(itemList);
+})
+
+/**
  * @desc Get All Order
  * @route /api/order/getAllOrder
  * @method GET
@@ -17,16 +27,7 @@ router.get("/getAllOrder", async (req, res) => {
 })
 
 
-/**
- * @desc Get All Items Order
- * @route /api/order/getAllItemsOrder
- * @method GET
- */
-router.get("/getAllItemsOrder", async (req, res) => {
-    const itemList = await ItemsOrder.find();
-    res.status(200).json(itemList);
-})
-
+//this method get price for item have this id
 async function getprice(id) {
     try {
         const item = await Menu.findById(id);
