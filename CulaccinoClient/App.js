@@ -11,24 +11,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
-const baseUrl = "http://192.168.1.158:5000/api/";
+const baseUrl = "http://192.168.100.5:5000/api/";
 const Tab = createBottomTabNavigator();
 
 
 //Start HomeScreen
 function HomeScreen() {
   const [data, setData] = useState([])
-  const [cart, setCart] = useState([])
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-
   useEffect(() => {
     fetch(baseUrl + "menu/getAll").then((response) => response.json()).then((json) => setData(json)).catch((error) => alert(error))
   })
 
   const handlePress = (d) => {
     const myArray2 = [];
-
     const retrieveData = async (name) => {
       try {
         const jsonString = await AsyncStorage.getItem(name);
@@ -54,54 +49,60 @@ function HomeScreen() {
   };
 
   return (
+    <ImageBackground source={require('./assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
+      <SafeAreaView>
+        <View style={homeStyles.container}>
+          <View style={homeStyles.menuContainer}>
+            <Pressable>
+              {/* ,    justifyContent: 'center' */}
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ fontWeight: "bold", fontSize: 25, marginHorizontal: "14%", marginVertical: "5%", textAlign: "left" }}>Name</Text>
+                <Text style={{ fontWeight: "bold", fontSize: 25, marginHorizontal: "14%", marginVertical: "5%", textAlign: "right" }}>Price</Text>
+              </View>
+              <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: "5%" }} />
 
-    <SafeAreaView>
-
-      <View style={homeStyles.container}>
-        <View style={homeStyles.buttonContainer}>
-          <Pressable>
-            <Text style={{ fontWeight: "bold", fontSize: 30 }}>Item Name</Text>
-            <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: "5%" }} />
-            <FlatList
-              data={data}
-              keyExtractor={({ idName }) => idName}
-              renderItem={({ item }) => (
-                <TouchableOpacity onLongPress={() => handlePress(item.description)} style={{ flexDirection: 'row' }}>
-                  <Text style={{ marginLeft: "2%", marginBottom: "15%", fontWeight: "500", fontSize: 20 }}>
-                    {item.name}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </Pressable>
-        </View>
-        <View style={homeStyles.buttonContainer}>
-          <Pressable>
-            <Text style={{ fontWeight: "bold", fontSize: 30 }}>Item Price</Text>
-            <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: "5%" }} />
-            <FlatList
-              data={data}
-              keyExtractor={({ idPrice }) => idPrice}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={{ flexDirection: 'row' }}>
-                  <Text style={{ marginLeft: "5%", marginBottom: "15%", marginRight: "20%", fontWeight: "500", fontSize: 20 }}>{item.price} JD</Text>
-                  <TouchableOpacity onPress={() => handlePress(
-                    {
-                      id: item._id,
-                      name: item.name,
-                      price: item.price
-                    }
-                  )} style={{ flexDirection: 'row' }}>
-                    <Icon name="add-circle" size={30} color="tomato" />
+              <FlatList
+                data={data}
+                keyExtractor={(item) => item._id} // Use the 'id' property as the key
+                renderItem={({ item }) => (
+                  // Your existing renderItem logic
+                  <TouchableOpacity onPress={() => Alert.alert(item.description)} style={{ flexDirection: 'row' }}>
+                    <View style={{ width: "60%" }}>
+                      <Text style={{ marginBottom: "15%", fontWeight: "400", fontSize: 20 }}>
+                        {item.name}
+                      </Text>
+                    </View>
+                    <View style={{ width: "30%" }}>
+                      <TouchableOpacity style={{ flexDirection: 'row' }}>
+                        <Text style={{ marginLeft: "2%", marginBottom: "15%", fontWeight: "500", fontSize: 20 }}>{item.price} JD</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View>
+                      <TouchableOpacity style={{ flexDirection: 'row' }}>
+                        <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => handlePress(
+                          {
+                            id: item._id,
+                            name: item.name,
+                            price: item.price
+                          }
+                        )}  >
+                          <Text style={{ marginLeft: "2%", marginBottom: "15%", marginTop: "15%", fontWeight: "500", fontSize: 20 }}>
+                            <Icon name="add-circle" style={homeStyles.quantityButton} color="tomato" />
+                          </Text>
+                        </TouchableOpacity>
+                      </TouchableOpacity>
+                    </View>
                   </TouchableOpacity>
-                </TouchableOpacity>
 
-              )}
-            />
-          </Pressable>
+                )}
+              />
+            </Pressable>
+          </View>
+
         </View>
-      </View>
-    </SafeAreaView>
+
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 //End HomeScreen
@@ -112,10 +113,21 @@ const homeStyles = StyleSheet.create({
     flexDirection: 'row', // Arrange items horizontally
     justifyContent: 'center', // Center items horizontally
     marginTop: 20,
+    backgroundColor: "#dff",
+    margin: "3%",
+    borderRadius: 10,
+    opacity: 0.8
   },
-  buttonContainer: {
+  quantityButton: {
+    fontSize: 30,
+    position: "relative",
+    right: 0,
+    width: "50%",
+  },
+  menuContainer: {
     flex: 1, // Each button container should take equal space
     marginHorizontal: 5,
+    width: "100%"
   },
   button: {
     backgroundColor: 'blue',
@@ -160,26 +172,71 @@ function CartScreen() {
   }, [isFocused]);
 
   const renderItem = ({ item }) => (
-    <SafeAreaView>
-      <Text onPress={() => { console.log(data); }}>{item.name}</Text>
-      <Text>Price: $ {item.price}</Text>
-      <Text>Quantities: {item.quantity}</Text>
+    <SafeAreaView style={{ flexDirection: 'row' }}>
+      <View style={{ width: "55%" }}>
+        <Text style={{ marginLeft: "2%", marginBottom: "15%", fontWeight: "400", fontSize: 20 }}>{item.quantity} {item.name}</Text>
+      </View>
+      <View style={{ width: "25%" }}>
+        <Text style={{ marginLeft: "15%", marginBottom: "15%", fontWeight: "400", fontSize: 20 }}>{item.price} JD</Text>
+      </View>
+      <Text style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
+        <Icon name="add-circle" style={cartStyles.quantityButton} color="tomato" />
+      </Text>
+      <Text style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
+        <Icon name="remove-circle" style={cartStyles.quantityButton} color="tomato" />
+      </Text>
     </SafeAreaView>
   );
 
   return (
-    <FlatList
-      data={data}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id}
-    />
+    <ImageBackground source={require('./assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
+      <SafeAreaView>
+        <View style={cartStyles.container}>
+          <View style={cartStyles.menuContainer}>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ width: "55%" }}>
+                <Text style={{ fontWeight: "bold", fontSize: 17, marginHorizontal: "14%", marginVertical: "5%", textAlign: "left" }}>Name</Text>
+              </View>
+              <View style={{ width: "25%"}}>
+                <Text style={{ fontWeight: "bold", fontSize: 17, marginHorizontal: "14%", marginVertical: "5%", textAlign: "left" }}>Price</Text>
+              </View>
+            </View>
+            <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: "5%" }} />
+
+            <FlatList
+              data={data}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+            />
+          </View>
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 //End CartScreen
 
 //Start cartStyles
 const cartStyles = StyleSheet.create({
-
+  container: {
+    flexDirection: 'row', // Arrange items horizontally
+    justifyContent: 'center', // Center items horizontally
+    marginTop: 20,
+    backgroundColor: "#dff",
+    margin: "3%",
+    borderRadius: 10,
+    opacity: 0.8
+  },
+  menuContainer: {
+    flex: 1, // Each button container should take equal space
+    marginHorizontal: 5,
+    width: "100%"
+  },
+  quantityButton: {
+    fontSize: 28,
+    position: "relative",
+    right: 0,
+  },
 });
 //End cartStyles
 
