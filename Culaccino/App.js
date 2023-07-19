@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { View, TouchableOpacity, Alert, Text, FlatList, Button, Dimensions, ImageBackground, TextInput, StyleSheet, Pressable, Image, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation, useIsFocused } from "@react-navigation/native"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -28,7 +28,7 @@ function HomeScreen() {
 
   const handlePress = (d) => {
     const myArray2 = [];
-  
+
     const retrieveData = async (name) => {
       try {
         const jsonString = await AsyncStorage.getItem(name);
@@ -49,10 +49,10 @@ function HomeScreen() {
         console.error('Error retrieving JSON data:', error);
       }
     };
-  
+
     retrieveData("cartItems");
   };
-  
+
   return (
 
     <SafeAreaView>
@@ -131,9 +131,10 @@ const homeStyles = StyleSheet.create({
 
 
 //Start CartScreen
+
 function CartScreen() {
   const [data, setData] = useState([]);
-  const [value, setValue] = useState();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     // Function to retrieve data from AsyncStorage
@@ -141,9 +142,11 @@ function CartScreen() {
       try {
         const jsonData = await AsyncStorage.getItem('cartItems');
         console.log('jsonData:', jsonData);
-        setValue(1)
         if (jsonData !== null) {
-          const parsedData = JSON.parse(jsonData);
+          const parsedData = JSON.parse(jsonData).map((item) => {
+            // If 'quantity' doesn't exist or is null, set it to 1 by default
+            return { ...item, quantity: item.quantity || 1 };
+          });
           console.log('parsedData:', parsedData);
           setData(parsedData);
         }
@@ -152,15 +155,15 @@ function CartScreen() {
       }
     };
 
+    // Call the function to fetch data whenever the screen is focused (Cart tab is pressed)
     getDataFromAsyncStorage();
-  }, []);
-  
+  }, [isFocused]);
 
-  const renderItem = ({ item },value) => (
+  const renderItem = ({ item }) => (
     <SafeAreaView>
-      <Text onPress={()=>{console.log(data);}}>{item.name}</Text>
+      <Text onPress={() => { console.log(data); }}>{item.name}</Text>
       <Text>Price: $ {item.price}</Text>
-      <Text>quantities: {value}</Text>
+      <Text>Quantities: {item.quantity}</Text>
     </SafeAreaView>
   );
 
@@ -645,10 +648,3 @@ export default function App() {
   );
 }
 //End App
-
-
-
-
-
-
-
