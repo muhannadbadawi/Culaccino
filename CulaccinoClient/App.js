@@ -156,7 +156,6 @@ function CartScreen() {
         console.log('jsonData:', jsonData);
         if (jsonData !== null) {
           const parsedData = JSON.parse(jsonData).map((item) => {
-            // If 'quantity' doesn't exist or is null, set it to 1 by default
             return { ...item, quantity: item.quantity || 1 };
           });
           console.log('parsedData:', parsedData);
