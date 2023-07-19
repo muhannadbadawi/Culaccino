@@ -52,7 +52,7 @@ function HomeScreen() {
     }
   };
   const filteredData = data.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-//return HomeScreen
+  //return HomeScreen
   return (
     <ImageBackground source={require('./assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
       <SafeAreaView style={{ height: '94%' }}>
@@ -256,7 +256,10 @@ function CartScreen() {
 
   return (
     <ImageBackground source={require('./assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
-      <SafeAreaView style={{ height: '100%' }}>
+      <SafeAreaView style={{ height: '94%' }}>
+        <View style={{width:"90%",height: "8%",flexDirection: 'row',backgroundColor:"#dff",marginHorizontal:"5%",opacity:0.7,borderRadius:10}}>
+          <Text style={{ fontWeight: "bold", color:"#000",fontSize: 25, marginHorizontal: "14%", marginVertical: "2%", textAlign: "left" }}><Icon name="shopping-cart" size={30} color="tomato" /> Cart List</Text>
+        </View>
         <View style={cartStyles.container}>
           <View style={cartStyles.menuContainer}>
             <View style={{ flexDirection: 'row' }}>
@@ -264,7 +267,7 @@ function CartScreen() {
                 <Text style={{ fontWeight: "bold", fontSize: 17, marginHorizontal: "14%", marginVertical: "5%", textAlign: "left" }}>Name</Text>
               </View>
               <View style={{ width: "25%" }}>
-                <Text style={{ fontWeight: "bold", fontSize: 17, marginHorizontal: "14%", marginVertical: "5%", textAlign: "left" }}>Price</Text>
+                <Text style={{ fontWeight: "bold", fontSize: 17, marginHorizontal: "14%", marginVertical: "10%", textAlign: "left" }}>Price</Text>
               </View>
             </View>
             <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: "5%" }} />
