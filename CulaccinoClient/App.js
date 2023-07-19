@@ -17,90 +17,96 @@ const Tab = createBottomTabNavigator();
 
 //Start HomeScreen
 function HomeScreen() {
-  const [data, setData] = useState([])
+  const [data, setData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   useEffect(() => {
-    fetch(baseUrl + "menu/getAll").then((response) => response.json()).then((json) => setData(json)).catch((error) => alert(error))
-  })
+    fetch(baseUrl + "menu/getAll")
+      .then((response) => response.json())
+      .then((json) => setData(json))
+      .catch((error) => alert(error));
+  }, []);
 
-  const handlePress = (d) => {
-    const myArray2 = [];
-    const retrieveData = async (name) => {
-      try {
-        const jsonString = await AsyncStorage.getItem(name);
-        if (jsonString !== null) {
-          const parsedData = JSON.parse(jsonString); // Parse the string into an array
-          parsedData.push(d);
-          console.log(parsedData);
-          // Now you need to save the updated data back to AsyncStorage
-          await AsyncStorage.setItem(name, JSON.stringify(parsedData));
+  const handlePress = async (itemToAdd) => {
+    try {
+      const jsonData = await AsyncStorage.getItem("cartItems");
+      if (jsonData !== null) {
+        const cartItems = JSON.parse(jsonData);
+        const existingItemIndex = cartItems.findIndex((item) => item.id === itemToAdd.id);
+
+        if (existingItemIndex !== -1) {
+          // Item already exists in the cart, increment its quantity
+          cartItems[existingItemIndex].quantity += 1;
         } else {
-          console.log('JSON data not found.');
-          myArray2.push(d);
-          console.log(myArray2);
-          // Save the data in myArray2 to AsyncStorage
-          await AsyncStorage.setItem(name, JSON.stringify(myArray2));
+          // Item does not exist in the cart, add it with quantity 1
+          cartItems.push({ ...itemToAdd, quantity: 1 });
         }
-      } catch (error) {
-        console.error('Error retrieving JSON data:', error);
+
+        await AsyncStorage.setItem("cartItems", JSON.stringify(cartItems));
+      } else {
+        // If cartItems is not found in AsyncStorage, create a new array with the itemToAdd
+        const newCartItems = [{ ...itemToAdd, quantity: 1 }];
+        await AsyncStorage.setItem("cartItems", JSON.stringify(newCartItems));
       }
-    };
-
-    retrieveData("cartItems");
+    } catch (error) {
+      console.error("Error retrieving/updating cart data:", error);
+    }
   };
-
+  const filteredData = data.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+//return HomeScreen
   return (
     <ImageBackground source={require('./assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
-      <SafeAreaView>
+      <SafeAreaView style={{ height: '94%' }}>
+        {/* Add a text input for search */}
+        <TextInput
+          value={searchQuery}
+          onChangeText={(text) => setSearchQuery(text)}
+          placeholder="Search by name"
+          style={homeStyles.searchItemInput}
+        />
+
         <View style={homeStyles.container}>
           <View style={homeStyles.menuContainer}>
-            <Pressable>
-              {/* ,    justifyContent: 'center' */}
-              <View style={{ flexDirection: 'row' }}>
-                <Text style={{ fontWeight: "bold", fontSize: 25, marginHorizontal: "14%", marginVertical: "5%", textAlign: "left" }}>Name</Text>
-                <Text style={{ fontWeight: "bold", fontSize: 25, marginHorizontal: "14%", marginVertical: "5%", textAlign: "right" }}>Price</Text>
-              </View>
-              <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: "5%" }} />
+            {/* Header row */}
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 25, marginHorizontal: '14%', marginVertical: '5%', textAlign: 'left' }}>Name</Text>
+              <Text style={{ fontWeight: 'bold', fontSize: 25, marginHorizontal: '14%', marginVertical: '5%', textAlign: 'right' }}>Price</Text>
+            </View>
+            <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: '5%' }} />
 
-              <FlatList
-                data={data}
-                keyExtractor={(item) => item._id} // Use the 'id' property as the key
-                renderItem={({ item }) => (
-                  // Your existing renderItem logic
-                  <TouchableOpacity onPress={() => Alert.alert(item.description)} style={{ flexDirection: 'row' }}>
-                    <View style={{ width: "60%" }}>
-                      <Text style={{ marginBottom: "15%", fontWeight: "400", fontSize: 20 }}>
-                        {item.name}
+            {/* FlatList to display the items */}
+            <FlatList
+              data={filteredData} // Use the filtered data
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => Alert.alert(item.description)} style={{ flexDirection: 'row' }}>
+                  <View style={{ width: '60%' }}>
+                    <Text style={{ marginBottom: '15%', fontWeight: '400', fontSize: 20 }}>
+                      {item.name}
+                    </Text>
+                  </View>
+                  <View style={{ width: '30%' }}>
+                    <TouchableOpacity style={{ flexDirection: 'row' }}>
+                      <Text style={{ marginLeft: '2%', marginBottom: '15%', fontWeight: '500', fontSize: 20 }}>{item.price} JD</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View>
+                    <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => handlePress(
+                      {
+                        id: item._id,
+                        name: item.name,
+                        price: item.price
+                      }
+                    )}  >
+                      <Text style={{ marginLeft: '2%', marginBottom: '15%', marginTop: '15%', fontWeight: '500', fontSize: 20 }}>
+                        <Icon name="add-circle" style={homeStyles.quantityButton} color="tomato" />
                       </Text>
-                    </View>
-                    <View style={{ width: "30%" }}>
-                      <TouchableOpacity style={{ flexDirection: 'row' }}>
-                        <Text style={{ marginLeft: "2%", marginBottom: "15%", fontWeight: "500", fontSize: 20 }}>{item.price} JD</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <View>
-                      <TouchableOpacity style={{ flexDirection: 'row' }}>
-                        <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => handlePress(
-                          {
-                            id: item._id,
-                            name: item.name,
-                            price: item.price
-                          }
-                        )}  >
-                          <Text style={{ marginLeft: "2%", marginBottom: "15%", marginTop: "15%", fontWeight: "500", fontSize: 20 }}>
-                            <Icon name="add-circle" style={homeStyles.quantityButton} color="tomato" />
-                          </Text>
-                        </TouchableOpacity>
-                      </TouchableOpacity>
-                    </View>
-                  </TouchableOpacity>
-
-                )}
-              />
-            </Pressable>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
           </View>
-
         </View>
-
       </SafeAreaView>
     </ImageBackground>
   );
@@ -116,7 +122,14 @@ const homeStyles = StyleSheet.create({
     backgroundColor: "#dff",
     margin: "3%",
     borderRadius: 10,
-    opacity: 0.8
+    opacity: 0.8,
+    height: "100%",
+  },
+  menuContainer: {
+    flex: 1, // Each button container should take equal space
+    marginHorizontal: 5,
+    width: "100%",
+    height: "100%",
   },
   quantityButton: {
     fontSize: 30,
@@ -124,10 +137,15 @@ const homeStyles = StyleSheet.create({
     right: 0,
     width: "50%",
   },
-  menuContainer: {
-    flex: 1, // Each button container should take equal space
-    marginHorizontal: 5,
-    width: "100%"
+  searchItemInput: {
+    justifyContent: 'center', // Center items horizontally
+    marginHorizontal: "5%",
+    width: "90%",
+    height: "8%",
+    backgroundColor: "#fff",
+    padding: "4%",
+    fontSize: 15,
+    borderRadius: 10
   },
   button: {
     backgroundColor: 'blue',
@@ -169,34 +187,83 @@ function CartScreen() {
     // Call the function to fetch data whenever the screen is focused (Cart tab is pressed)
     getDataFromAsyncStorage();
   }, [isFocused]);
+  const handleIncrement = (itemId) => {
+    const existingItemIndex = data.findIndex((item) => item.id === itemId);
+
+    if (existingItemIndex !== -1) {
+      // Item already exists in the cart, increment its quantity
+      const updatedData = [...data];
+      updatedData[existingItemIndex].quantity += 1;
+      setData(updatedData);
+      saveDataToAsyncStorage(updatedData); // Save the updated data to AsyncStorage
+    } else {
+      // Item does not exist in the cart, add it with quantity 1
+      const itemToAdd = data.find((item) => item.id === itemId);
+
+      if (itemToAdd) {
+        const updatedData = [...data, { ...itemToAdd, quantity: 1 }];
+        setData(updatedData);
+        saveDataToAsyncStorage(updatedData); // Save the updated data to AsyncStorage
+      }
+    }
+  };
+
+  // Function to handle decrementing the quantity of an item in the cart
+  const handleDecrement = (itemId) => {
+    const existingItemIndex = data.findIndex((item) => item.id === itemId);
+
+    if (existingItemIndex !== -1) {
+      const updatedData = [...data];
+      const newQuantity = updatedData[existingItemIndex].quantity - 1;
+
+      if (newQuantity === 0) {
+        // If the quantity becomes zero, remove the item from the cart
+        updatedData.splice(existingItemIndex, 1);
+      } else {
+        updatedData[existingItemIndex].quantity = newQuantity;
+      }
+
+      setData(updatedData);
+      saveDataToAsyncStorage(updatedData); // Save the updated data to AsyncStorage
+    }
+  };
+
+  // Function to save cart data to AsyncStorage
+  const saveDataToAsyncStorage = async (cartData) => {
+    try {
+      await AsyncStorage.setItem('cartItems', JSON.stringify(cartData));
+    } catch (error) {
+      console.error('Error saving data to AsyncStorage:', error);
+    }
+  };
 
   const renderItem = ({ item }) => (
     <SafeAreaView style={{ flexDirection: 'row' }}>
       <View style={{ width: "55%" }}>
-        <Text style={{ marginLeft: "2%", marginBottom: "15%", fontWeight: "400", fontSize: 20 }}>{item.quantity} {item.name}</Text>
+        <Text style={{ marginLeft: "2%", marginBottom: "5%", fontWeight: "400", fontSize: 20 }}>{item.quantity} {item.name}</Text>
       </View>
       <View style={{ width: "25%" }}>
-        <Text style={{ marginLeft: "15%", marginBottom: "15%", fontWeight: "400", fontSize: 20 }}>{item.price} JD</Text>
+        <Text style={{ marginLeft: "15%", marginBottom: "5%", fontWeight: "400", fontSize: 20 }}>{item.price} JD</Text>
       </View>
-      <Text style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
+      <TouchableOpacity onPress={() => handleIncrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
         <Icon name="add-circle" style={cartStyles.quantityButton} color="tomato" />
-      </Text>
-      <Text style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleDecrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
         <Icon name="remove-circle" style={cartStyles.quantityButton} color="tomato" />
-      </Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 
   return (
     <ImageBackground source={require('./assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
-      <SafeAreaView>
+      <SafeAreaView style={{ height: '100%' }}>
         <View style={cartStyles.container}>
           <View style={cartStyles.menuContainer}>
             <View style={{ flexDirection: 'row' }}>
               <View style={{ width: "55%" }}>
                 <Text style={{ fontWeight: "bold", fontSize: 17, marginHorizontal: "14%", marginVertical: "5%", textAlign: "left" }}>Name</Text>
               </View>
-              <View style={{ width: "25%"}}>
+              <View style={{ width: "25%" }}>
                 <Text style={{ fontWeight: "bold", fontSize: 17, marginHorizontal: "14%", marginVertical: "5%", textAlign: "left" }}>Price</Text>
               </View>
             </View>
@@ -205,7 +272,7 @@ function CartScreen() {
             <FlatList
               data={data}
               renderItem={renderItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item, index) => index.toString()} // Use the index as the key
             />
           </View>
         </View>
@@ -224,12 +291,14 @@ const cartStyles = StyleSheet.create({
     backgroundColor: "#dff",
     margin: "3%",
     borderRadius: 10,
-    opacity: 0.8
+    opacity: 0.8,
+    height: "100%",
   },
   menuContainer: {
     flex: 1, // Each button container should take equal space
     marginHorizontal: 5,
-    width: "100%"
+    width: "100%",
+    height: "100%",
   },
   quantityButton: {
     fontSize: 28,
@@ -369,10 +438,10 @@ function Login() {
 
       <SafeAreaView style={loginStyles.container}>
         <Text style={loginStyles.lable}>Email</Text>
-        <TextInput keyboardType='email-address' style={loginStyles.input} onChangeText={newText => setEmail(newText.toString())}>Yousef@yahoo.com</TextInput>
+        <TextInput keyboardType='email-address' style={loginStyles.input} onChangeText={newText => setEmail(newText.toString())}>Yousef@yahoo.co</TextInput>
 
         <Text style={loginStyles.lable}>Password</Text>
-        <TextInput secureTextEntry={true} keyboardType='visible-password' style={loginStyles.input} onChangeText={newText => setPassword(newText.toString())}>123</TextInput>
+        <TextInput secureTextEntry={true} keyboardType='visible-password' style={loginStyles.input} onChangeText={newText => setPassword(newText.toString())}></TextInput>
         <View style={loginStyles.buttonsBox}>
           <Pressable style={loginStyles.buttonContainer} onPress={() => navigation.navigate("Register")}  >
 
