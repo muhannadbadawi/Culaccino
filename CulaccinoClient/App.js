@@ -19,72 +19,102 @@ const Tab = createBottomTabNavigator();
 function HomeScreen() {
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [cartItems, setCartItems] = useState([]);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    fetch(baseUrl + "menu/getAll")
+    fetch(baseUrl + 'menu/getAll')
       .then((response) => response.json())
       .then((json) => setData(json))
       .catch((error) => alert(error));
-  }, []);
 
-  const handlePress = async (itemToAdd) => {
-    try {
-      const jsonData = await AsyncStorage.getItem("cartItems");
-      if (jsonData !== null) {
-        const cartItems = JSON.parse(jsonData);
-        const existingItems = cartItems.findIndex((item) => item.id === itemToAdd.id);
-
-        if (existingItems !== -1) {
-          // Item already exists in the cart, increase the quantity
-          cartItems[existingItems].quantity += 1;
-        } else {
-          // Item does not exist in the cart, add it with quantity 1
-          cartItems.push({ ...itemToAdd, quantity: 1 });
+    // Fetch cart items from AsyncStorage when the component mounts
+    AsyncStorage.getItem('cartItems')
+      .then((jsonData) => {
+        if (jsonData !== null) {
+          setCartItems(JSON.parse(jsonData));
         }
-
-        await AsyncStorage.setItem("cartItems", JSON.stringify(cartItems));
-      } else {
-        // If cartItems is not found in AsyncStorage, create a new array with the itemToAdd
-        const newCartItems = [{ ...itemToAdd, quantity: 1 }];
-        await AsyncStorage.setItem("cartItems", JSON.stringify(newCartItems));
-      }
-    } catch (error) {
-      console.error("Error retrieving/updating cart data:", error);
-    }
-  };
+      })
+      .catch((error) => console.error('Error retrieving cart data:', error));
+  }, [isFocused]);
   const filteredData = data.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
 
+  const handlePress = async (itemToAdd) => {
+    try {
+      const jsonData = await AsyncStorage.getItem('cartItems');
+      let cartItems = [];
+
+      if (jsonData !== null) {
+        cartItems = JSON.parse(jsonData);
+        const existingItemIndex = cartItems.findIndex((item) => item.id === itemToAdd.id);
+
+        if (existingItemIndex !== -1) {
+          // Item already exists in the cart, increase the quantity
+          cartItems[existingItemIndex].quantity += 1;
+        } else {
+          // Item does not exist in the cart, add it with quantity 1
+          itemToAdd.quantity = 1; // Set the quantity to 1 for a new item
+          cartItems.push(itemToAdd);
+        }
+      } else {
+        // If cartItems is not found in AsyncStorage, create a new array with the itemToAdd
+        itemToAdd.quantity = 1; // Set the quantity to 1 for the first item in the cart
+        cartItems.push(itemToAdd);
+      }
+
+      await AsyncStorage.setItem('cartItems', JSON.stringify(cartItems));
+      setCartItems(cartItems); // Update the state with the updated cart items
+    } catch (error) {
+      console.error('Error retrieving/updating cart data:', error);
+    }
+  };
+
   //list items body 
-  const renderItem =({ item }) => (
-    <TouchableOpacity onPress={() => Alert.alert(item.description)} style={{ flexDirection: 'row' }}>
-      <View style={{ width: '60%' }}>
-        <Text style={homeStyles.textItem}>
-          {item.name}
-        </Text>
-      </View>
-      <View style={{ width: '30%' }}>
-        <TouchableOpacity style={{ flexDirection: 'row' }}>
+  const renderItem = ({ item }) => {
+    // Check if the item exists in AsyncStorage cart
+    const cartItemIndex = cartItems.findIndex((cartItem) => cartItem.id === item._id);
+    const quantity = cartItemIndex !== -1 ? cartItems[cartItemIndex].quantity : 0;
+
+    return (
+      <TouchableOpacity onPress={() => Alert.alert(item.description)} style={{ flexDirection: 'row' }}>
+        <View style={{ width: '10%' }}>
           <Text style={homeStyles.textItem}>
-            {item.price} JD
+            ({quantity})
           </Text>
-        </TouchableOpacity>
-      </View>
-      <View>
-        <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => handlePress(
-          {
-            id: item._id,
-            name: item.name,
-            price: item.price
-          }
-        )}  >
+        </View>
+        <View style={{ width: '50%' }}>
           <Text style={homeStyles.textItem}>
-            <Icon name="add-circle" style={homeStyles.quantityButton} color="tomato" />
+            {item.name}
           </Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  )
+        </View>
+        <View style={{ width: '30%' }}>
+          <TouchableOpacity style={{ flexDirection: 'row' }}>
+            <Text style={homeStyles.textItem}>
+              {item.price} JD
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View>
+          <TouchableOpacity
+            style={{ flexDirection: 'row' }}
+            onPress={() =>
+              handlePress({
+                id: item._id,
+                name: item.name,
+                price: item.price,
+                quantity: quantity + 1, // Always set the quantity to at least one when adding
+              })
+            }
+          >
+            <Text style={homeStyles.textItem}>
+              <Icon name="add-circle" style={homeStyles.quantityButton} color="tomato" />
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
 
   //Stert return HomeScreen
@@ -150,7 +180,7 @@ const homeStyles = StyleSheet.create({
   textItem: {
     marginBottom: '15%',
     fontWeight: '400',
-    fontSize: 20
+    fontSize: 18
   },
   searchItemInput: {
     justifyContent: 'center', // Center items horizontally
@@ -291,7 +321,7 @@ function CartScreen() {
             <FlatList
               data={data}
               keyExtractor={(item) => item.id}
-              renderItem={renderItem} 
+              renderItem={renderItem}
             />
           </View>
         </View>
@@ -475,7 +505,6 @@ function Login() {
 
         <Text style={loginStyles.lable}>Password</Text>
         <TextInput secureTextEntry={true} keyboardType='visible-password' style={loginStyles.input} onChangeText={newText => setPassword(md5(newText.toString()))}></TextInput>
-        <Text>{password}</Text>
         <View style={loginStyles.buttonsBox}>
           <Pressable style={loginStyles.buttonContainer} onPress={() => navigation.navigate("Register")}  >
 
