@@ -15,7 +15,7 @@ const ItemsOrderSchema = new mongoose.Schema({
         minlength: 3,
         maxlength: 500
     },
-    quantities: {
+    quantity: {
         type: Number,
         required: true,
         trim: true,

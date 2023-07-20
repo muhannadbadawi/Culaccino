@@ -208,6 +208,9 @@ const homeStyles = StyleSheet.create({
 //Start CartScreen
 function CartScreen() {
   const [data, setData] = useState([]);
+  const [customerId, setCustomerId] = useState('');
+
+  const [totalPrice, setTotalPrice] = useState(0);
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -228,9 +231,27 @@ function CartScreen() {
       }
     };
 
+    AsyncStorage.getItem('id')
+      .then((itemValue) => {
+        setCustomerId(itemValue);
+      })
+      .catch((error) => {
+        console.error('Error retrieving item:', error);
+      });
+
+    const calculateTotalPrice = () => {
+      const totalPrice = data.reduce((total, item) => total + item.price * item.quantity, 0);
+      setTotalPrice(totalPrice);
+    };
+
+    calculateTotalPrice();
     // Call the function to fetch data whenever the screen is focused (Cart tab is pressed)
     getDataFromAsyncStorage();
   }, [isFocused]);
+
+
+
+
   // Function to handle increasing the quantity of an item in the cart
   const handleIncrement = (itemId) => {
     const existingItems = data.findIndex((item) => item.id === itemId);
@@ -283,22 +304,39 @@ function CartScreen() {
   };
 
   //list items body 
-  const renderItem = ({ item }) => (
-    <SafeAreaView style={{ flexDirection: 'row' }}>
-      <View style={{ width: "55%" }}>
-        <Text style={cartStyles.textItem}>{item.quantity}  {item.name}</Text>
-      </View>
-      <View style={{ width: "25%" }}>
-        <Text style={cartStyles.textItem}>{item.price} JD</Text>
-      </View>
-      <TouchableOpacity onPress={() => handleIncrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
-        <Icon name="add-circle" style={cartStyles.quantityButton} color="tomato" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleDecrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
-        <Icon name="remove-circle" style={cartStyles.quantityButton} color="tomato" />
-      </TouchableOpacity>
-    </SafeAreaView>
-  );
+  const renderItem = ({ item }) => {
+    const price = item.price * item.quantity;
+    return (
+      <SafeAreaView style={{ flexDirection: 'row' }}>
+        <View style={{ width: "55%" }}>
+          <Text style={cartStyles.textItem}>{item.quantity}  {item.name}</Text>
+        </View>
+        <View style={{ width: "25%" }}>
+          <Text style={cartStyles.textItem}>{price} JD</Text>
+        </View>
+        <TouchableOpacity onPress={() => handleIncrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
+          <Icon name="add-circle" style={cartStyles.quantityButton} color="tomato" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleDecrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
+          <Icon name="remove-circle" style={cartStyles.quantityButton} color="tomato" />
+        </TouchableOpacity>
+      </SafeAreaView>
+    )
+  };
+
+
+  const checkout = async () => {
+    const items = JSON.parse(await AsyncStorage.getItem('cartItems'));
+
+    fetch(baseUrl + "order", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add any other headers required by your API
+      },
+      body: JSON.stringify({ customerId, items })// Convert the data to JSON string
+    })
+  }
   //Start return CartScreen
   return (
     <ImageBackground source={require('./assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
@@ -323,6 +361,11 @@ function CartScreen() {
               keyExtractor={(item) => item.id}
               renderItem={renderItem}
             />
+            <Pressable style={cartStyles.buttonContainer} onPress={checkout}>
+
+              <Text style={cartStyles.buttonText}>checkout  {totalPrice} JD</Text>
+
+            </Pressable>
           </View>
         </View>
       </SafeAreaView>
@@ -337,12 +380,12 @@ const cartStyles = StyleSheet.create({
   container: {
     flexDirection: 'row', // Arrange items horizontally
     justifyContent: 'center', // Center items horizontally
+    height: "100%",
     marginTop: 20,
-    backgroundColor: "#dff",
     margin: "3%",
+    backgroundColor: "#dff",
     borderRadius: 10,
     opacity: 0.8,
-    height: "100%",
   },
   menuContainer: {
     flex: 1, // Each button container should take equal space
@@ -357,9 +400,24 @@ const cartStyles = StyleSheet.create({
   },
   textItem: {
     marginLeft: "3%",
-    marginBottom: "5%",
     fontWeight: "400",
     fontSize: 20
+  },
+  buttonContainer: {
+    justifyContent: 'center', // Center items horizontally
+    width: "40%",
+    height: "10%",
+    marginVertical: "3%",
+    backgroundColor: "#fff",
+    padding: "1%",
+    borderRadius: 10,
+    marginHorizontal: "5%"
+  },
+  buttonText: {
+    color: 'black',
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: "400"
   },
   textHeader: {
     fontWeight: "bold",
@@ -377,6 +435,8 @@ function ProfileScreen() {
   const [nameShare, setNameShare] = useState('');
   const [phoneShare, setPhoneShare] = useState('');
   const [idShare, setIdShare] = useState('');
+  const isFocused = useIsFocused();
+
 
   useEffect(() => {
     AsyncStorage.getItem('name')
@@ -407,7 +467,7 @@ function ProfileScreen() {
       .catch((error) => {
         console.error('Error retrieving item:', error);
       });
-  }, []);
+  }, [isFocused]);
   return (
     <ImageBackground source={require('./assets/img1.jpg')} resizeMode="cover" style={registerStyles.container}>
       <Pressable style={registerStyles.container1}>

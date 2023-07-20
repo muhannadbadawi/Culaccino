@@ -48,14 +48,14 @@ async function getprice(id) {
  * @method POST
  */
 router.post("/", async (req, res) => {
-    try {     
+    try {
         const list = req.body.items;
-        let totalPrice = 0; 
+        let totalPrice = 0;
         for (const element of list) {
-          const price = await getprice(element.itemId);
-          const totalPriceForItem = price * element.quantities;
-          totalPrice += totalPriceForItem;
-          console.log(totalPriceForItem);
+            const price = await getprice(element.id);
+            const totalPriceForItem = price * element.quantity;
+            totalPrice += totalPriceForItem;
+            console.log(totalPriceForItem);
         }
         const newOrder = new Order(
             {
@@ -64,19 +64,21 @@ router.post("/", async (req, res) => {
                 status: 0
             }
         )
-            newOrder.save();
+        
+        newOrder.save();
 
-            list.forEach(element => {
-                const newItemsOrder = new ItemsOrder(
-                    {
-                        itemId: element.itemId,
-                        quantities: element.quantities,
-                        orderId: newOrder._id
-                    }
-                );
-                console.log(newItemsOrder);
-                newItemsOrder.save();
-            });
+        list.forEach(element => {
+            const newItemsOrder = new ItemsOrder(
+                {
+                    itemId: element.id,
+                    orderId: newOrder._id,
+                    quantity: element.quantity
+                }
+            );
+
+            console.log(newItemsOrder);
+            newItemsOrder.save();
+        });
 
         res.status(201).json(newOrder._id);
     } catch (error) {
