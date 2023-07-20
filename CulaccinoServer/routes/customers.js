@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const { Customer } = require('../models/Customer');
+const e = require("express");
 
 
 /**
@@ -103,37 +104,64 @@ router.post("/", async (req, res) => {
 
 /**
  * @desc Update customer information
- * @route /api/customer/:id
+ * @route /api/customer/update/:id
  * @method PUT
  */
 router.put("/update/:id", async (req, res) => {
     try {
-        const p =await Customer.findById(req.params.id);
-        if(p){
-            if(req.body.oldPass===p.password){
-                const person = await Customer.findByIdAndUpdate(req.params.id, {
+        const p = await Customer.findById(req.params.id);
+        if (p.password === req.body.password) {
+            const person = await Customer.findByIdAndUpdate(req.params.id, {
+                $set: {
+                    name: req.body.name,
+                    email: req.body.email,
+                    phone: req.body.phone,
+                }
+            },
+                { new: true })
+            res.status(200).json({ message: "changed successfully!" })
+        }
+        else{
+            res.status(404).json({ message: "The password is wrong" });
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Something went wrong" });
+    }
+
+});
+/**
+ * @desc Update an Item
+ * @route /api/customer/updatePassword/:id
+ * @method PUT
+ */
+router.put("/updatePassword/:id", async (req, res) => {
+    try {
+        const p = await Customer.findById(req.params.id);
+        if (p) {
+            if (p.password === req.body.oldPassword) {
+                const item = await Customer.findByIdAndUpdate(req.params.id, {
                     $set: {
-                        name: req.body.newInfo.name,
-                        email: req.body.newInfo.email,
-                        phone: req.body.newInfo.phone,
-                        password:req.body.newInfo.password,
+                        password: req.body.newPassword
                     }
                 },
                     { new: true })
-                res.status(200).json(person)
+                res.status(200).json({ message: "Password changed successfully!" })
             }
-            else{
-                res.status(404).json({message:"Password error"});
+            else {
+                res.status(404).json({ message: "The old password is wrong" });
             }
-        }else{
-            res.status(404).json({message:"person not found"});
+        }
+        else {
+            res.status(404).json({ message: "person not found" });
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({message:"Something went wrong"});
+        console.error(error)
+        res.status(500).json({ message: "Something went wrong" });
     }
-   
 })
+
 
 function validateCreatePerson(obj) {
     const schema = Joi.object({

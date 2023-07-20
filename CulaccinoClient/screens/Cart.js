@@ -42,23 +42,26 @@ const renderItem = ({ item, handleDecrement, handleIncrement }) => {
   const price = item.price * item.quantity;
   return (
     <SafeAreaView style={{ flexDirection: 'row' }}>
-      <View style={{ width: "55%" }}>
-        <Text style={cartStyles.textItem}>{item.quantity} {item.name}</Text>
+      <View style={{ width: "10%" }}>
+        <Text style={{ fontSize: 18, color: "green" }}>{item.quantity} ×</Text>
       </View>
-      <View style={{ width: "25%" }}>
+      <View style={{ width: "50%" }}>
+        <Text style={cartStyles.textItem}>{item.name}</Text>
+      </View>
+      <View style={{ width: "20%" }}>
         <Text style={cartStyles.textItem}>{price} JD</Text>
       </View>
-      <TouchableOpacity onPress={() => handleDecrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
+      <TouchableOpacity onPress={() => handleDecrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 18 }}>
         <Icon name="remove-circle" style={cartStyles.quantityButton} color="tomato" />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleIncrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
+      <TouchableOpacity onPress={() => handleIncrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 18 }}>
         <Icon name="add-circle" style={cartStyles.quantityButton} color="tomato" />
       </TouchableOpacity>
     </SafeAreaView>
   )
 };
 function Cart() {
-    const [data, setData] = useState([]);
+  const [data, setData] = useState([]);
   const [customerId, setCustomerId] = useState('');
   const isFocused = useIsFocused();
 
@@ -141,10 +144,11 @@ function Cart() {
         <View style={cartStyles.container}>
           <View style={cartStyles.menuContainer}>
             <View style={{ flexDirection: 'row' }}>
-              <View style={{ width: "50%" }}>
+              <View style={{ width: "10%" }}></View>
+              <View style={{ width: "45%" }}>
                 <Text style={cartStyles.textHeader}>Name</Text>
               </View>
-              <View style={{ width: "50%" }}>
+              <View style={{ width: "45%" }}>
                 <Text style={cartStyles.textHeader}>Price</Text>
               </View>
             </View>
@@ -173,62 +177,62 @@ function Cart() {
     </ImageBackground>
   );
 
-    //End return CartScreen
+  //End return CartScreen
 }
 //End Cart
 
 //Start cartStyles
 const cartStyles = StyleSheet.create({
-    container: {
-        flexDirection: 'row', // Arrange items horizontally
-        justifyContent: 'center', // Center items horizontally
-        height: "100%",
-        marginTop: 20,
-        margin: "3%",
-        backgroundColor: "#dff",
-        borderRadius: 10,
-        opacity: 0.8,
-    },
-    menuContainer: {
-        flex: 1, // Each button container should take equal space
-        marginHorizontal: 5,
-        width: "100%",
-        height: "100%",
-    },
-    quantityButton: {
-        fontSize: 28,
-        position: "relative",
-        right: 0,
-    },
-    textItem: {
-        marginLeft: "3%",
-        fontWeight: "400",
-        fontSize: 20
-    },
-    buttonContainer: {
-        justifyContent: 'center', // Center items horizontally
-        width: "40%",
-        height: "10%",
-        marginVertical: "3%",
-        backgroundColor: "#fff",
-        padding: "1%",
-        borderRadius: 10,
-        marginHorizontal: "5%",
+  container: {
+    flexDirection: 'row', // Arrange items horizontally
+    justifyContent: 'center', // Center items horizontally
+    height: "100%",
+    marginTop: 20,
+    margin: "3%",
+    backgroundColor: "#dff",
+    borderRadius: 10,
+    opacity: 0.8,
+  },
+  menuContainer: {
+    flex: 1, // Each button container should take equal space
+    marginHorizontal: 5,
+    width: "100%",
+    height: "100%",
+  },
+  quantityButton: {
+    fontSize: 28,
+    position: "relative",
+    right: 0,
+  },
+  textItem: {
+    marginLeft: "3%",
+    fontWeight: "400",
+    fontSize: 18
+  },
+  buttonContainer: {
+    justifyContent: 'center', // Center items horizontally
+    width: "40%",
+    height: "10%",
+    marginVertical: "3%",
+    backgroundColor: "#fff",
+    padding: "1%",
+    borderRadius: 10,
+    marginHorizontal: "5%",
 
-    },
-    buttonText: {
-        color: 'black',
-        textAlign: 'center',
-        fontSize: 22,
-        fontWeight: "400",
-    },
-    textHeader: {
-        fontWeight: "bold",
-        fontSize: 17,
-        marginHorizontal: "14%",
-        marginVertical: "5%",
-        textAlign: "left"
-    }
+  },
+  buttonText: {
+    color: 'black',
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: "400",
+  },
+  textHeader: {
+    fontWeight: "bold",
+    fontSize: 17,
+    marginHorizontal: "14%",
+    marginVertical: "5%",
+    textAlign: "left"
+  }
 });
 //End cartStyles
 

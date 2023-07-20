@@ -1,4 +1,4 @@
-import { View, Alert, Text, ImageBackground, TextInput, Pressable,StyleSheet } from 'react-native';
+import { View, Alert, Text, ImageBackground, TextInput, Pressable, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,7 +12,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
 
-  
+
   const removeData = async (name) => {
     try {
       await AsyncStorage.removeItem(name);
