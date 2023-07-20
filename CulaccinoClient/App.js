@@ -1,15 +1,15 @@
+import { View, TouchableOpacity, Alert, Text, FlatList, Button, Dimensions, ImageBackground, TextInput, StyleSheet, Pressable, Image, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import { View, TouchableOpacity, Alert, Text, FlatList, Button, Dimensions, ImageBackground, TextInput, StyleSheet, Pressable, Image, ScrollView } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import { useNavigation, useIsFocused } from "@react-navigation/native"
+import React, { useState, useEffect } from 'react';
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
+import md5 from 'md5';
 
 const baseUrl = "http://192.168.100.5:5000/api/";
 const Tab = createBottomTabNavigator();
@@ -19,6 +19,7 @@ const Tab = createBottomTabNavigator();
 function HomeScreen() {
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
     fetch(baseUrl + "menu/getAll")
       .then((response) => response.json())
@@ -31,11 +32,11 @@ function HomeScreen() {
       const jsonData = await AsyncStorage.getItem("cartItems");
       if (jsonData !== null) {
         const cartItems = JSON.parse(jsonData);
-        const existingItemIndex = cartItems.findIndex((item) => item.id === itemToAdd.id);
+        const existingItems = cartItems.findIndex((item) => item.id === itemToAdd.id);
 
-        if (existingItemIndex !== -1) {
-          // Item already exists in the cart, increment its quantity
-          cartItems[existingItemIndex].quantity += 1;
+        if (existingItems !== -1) {
+          // Item already exists in the cart, increase the quantity
+          cartItems[existingItems].quantity += 1;
         } else {
           // Item does not exist in the cart, add it with quantity 1
           cartItems.push({ ...itemToAdd, quantity: 1 });
@@ -52,7 +53,41 @@ function HomeScreen() {
     }
   };
   const filteredData = data.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  //return HomeScreen
+
+
+  //list items body 
+  const renderItem =({ item }) => (
+    <TouchableOpacity onPress={() => Alert.alert(item.description)} style={{ flexDirection: 'row' }}>
+      <View style={{ width: '60%' }}>
+        <Text style={homeStyles.textItem}>
+          {item.name}
+        </Text>
+      </View>
+      <View style={{ width: '30%' }}>
+        <TouchableOpacity style={{ flexDirection: 'row' }}>
+          <Text style={homeStyles.textItem}>
+            {item.price} JD
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View>
+        <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => handlePress(
+          {
+            id: item._id,
+            name: item.name,
+            price: item.price
+          }
+        )}  >
+          <Text style={homeStyles.textItem}>
+            <Icon name="add-circle" style={homeStyles.quantityButton} color="tomato" />
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  )
+
+
+  //Stert return HomeScreen
   return (
     <ImageBackground source={require('./assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
       <SafeAreaView style={{ height: '94%' }}>
@@ -66,50 +101,25 @@ function HomeScreen() {
 
         <View style={homeStyles.container}>
           <View style={homeStyles.menuContainer}>
-            {/* Header row */}
+            {/*display the Header */}
             <View style={{ flexDirection: 'row' }}>
               <Text style={{ fontWeight: 'bold', fontSize: 25, marginHorizontal: '14%', marginVertical: '5%', textAlign: 'left' }}>Name</Text>
               <Text style={{ fontWeight: 'bold', fontSize: 25, marginHorizontal: '14%', marginVertical: '5%', textAlign: 'right' }}>Price</Text>
             </View>
             <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: '5%' }} />
 
-            {/* FlatList to display the items */}
+            {/* display the items  */}
             <FlatList
-              data={filteredData} // Use the filtered data
+              data={filteredData}
               keyExtractor={(item) => item._id}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => Alert.alert(item.description)} style={{ flexDirection: 'row' }}>
-                  <View style={{ width: '60%' }}>
-                    <Text style={{ marginBottom: '15%', fontWeight: '400', fontSize: 20 }}>
-                      {item.name}
-                    </Text>
-                  </View>
-                  <View style={{ width: '30%' }}>
-                    <TouchableOpacity style={{ flexDirection: 'row' }}>
-                      <Text style={{ marginLeft: '2%', marginBottom: '15%', fontWeight: '500', fontSize: 20 }}>{item.price} JD</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View>
-                    <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => handlePress(
-                      {
-                        id: item._id,
-                        name: item.name,
-                        price: item.price
-                      }
-                    )}  >
-                      <Text style={{ marginLeft: '2%', marginBottom: '15%', marginTop: '15%', fontWeight: '500', fontSize: 20 }}>
-                        <Icon name="add-circle" style={homeStyles.quantityButton} color="tomato" />
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </TouchableOpacity>
-              )}
+              renderItem={renderItem}
             />
           </View>
         </View>
       </SafeAreaView>
     </ImageBackground>
   );
+  //End return HomeScreen
 }
 //End HomeScreen
 
@@ -137,6 +147,11 @@ const homeStyles = StyleSheet.create({
     right: 0,
     width: "50%",
   },
+  textItem: {
+    marginBottom: '15%',
+    fontWeight: '400',
+    fontSize: 20
+  },
   searchItemInput: {
     justifyContent: 'center', // Center items horizontally
     marginHorizontal: "5%",
@@ -161,7 +176,6 @@ const homeStyles = StyleSheet.create({
 
 
 //Start CartScreen
-
 function CartScreen() {
   const [data, setData] = useState([]);
   const isFocused = useIsFocused();
@@ -187,13 +201,14 @@ function CartScreen() {
     // Call the function to fetch data whenever the screen is focused (Cart tab is pressed)
     getDataFromAsyncStorage();
   }, [isFocused]);
+  // Function to handle increasing the quantity of an item in the cart
   const handleIncrement = (itemId) => {
-    const existingItemIndex = data.findIndex((item) => item.id === itemId);
+    const existingItems = data.findIndex((item) => item.id === itemId);
 
-    if (existingItemIndex !== -1) {
+    if (existingItems !== -1) {
       // Item already exists in the cart, increment its quantity
       const updatedData = [...data];
-      updatedData[existingItemIndex].quantity += 1;
+      updatedData[existingItems].quantity += 1;
       setData(updatedData);
       saveDataToAsyncStorage(updatedData); // Save the updated data to AsyncStorage
     } else {
@@ -210,17 +225,17 @@ function CartScreen() {
 
   // Function to handle decrementing the quantity of an item in the cart
   const handleDecrement = (itemId) => {
-    const existingItemIndex = data.findIndex((item) => item.id === itemId);
+    const existingItems = data.findIndex((item) => item.id === itemId);
 
-    if (existingItemIndex !== -1) {
+    if (existingItems !== -1) {
       const updatedData = [...data];
-      const newQuantity = updatedData[existingItemIndex].quantity - 1;
+      const newQuantity = updatedData[existingItems].quantity - 1;
 
       if (newQuantity === 0) {
         // If the quantity becomes zero, remove the item from the cart
-        updatedData.splice(existingItemIndex, 1);
+        updatedData.splice(existingItems, 1);
       } else {
-        updatedData[existingItemIndex].quantity = newQuantity;
+        updatedData[existingItems].quantity = newQuantity;
       }
 
       setData(updatedData);
@@ -237,13 +252,14 @@ function CartScreen() {
     }
   };
 
+  //list items body 
   const renderItem = ({ item }) => (
     <SafeAreaView style={{ flexDirection: 'row' }}>
       <View style={{ width: "55%" }}>
-        <Text style={{ marginLeft: "2%", marginBottom: "5%", fontWeight: "400", fontSize: 20 }}>{item.quantity} {item.name}</Text>
+        <Text style={cartStyles.textItem}>{item.quantity}  {item.name}</Text>
       </View>
       <View style={{ width: "25%" }}>
-        <Text style={{ marginLeft: "15%", marginBottom: "5%", fontWeight: "400", fontSize: 20 }}>{item.price} JD</Text>
+        <Text style={cartStyles.textItem}>{item.price} JD</Text>
       </View>
       <TouchableOpacity onPress={() => handleIncrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 20 }}>
         <Icon name="add-circle" style={cartStyles.quantityButton} color="tomato" />
@@ -253,35 +269,36 @@ function CartScreen() {
       </TouchableOpacity>
     </SafeAreaView>
   );
-
+  //Start return CartScreen
   return (
     <ImageBackground source={require('./assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
       <SafeAreaView style={{ height: '94%' }}>
-        <View style={{width:"90%",height: "8%",flexDirection: 'row',backgroundColor:"#dff",marginHorizontal:"5%",opacity:0.7,borderRadius:10}}>
-          <Text style={{ fontWeight: "bold", color:"#000",fontSize: 25, marginHorizontal: "14%", marginVertical: "2%", textAlign: "left" }}><Icon name="shopping-cart" size={30} color="tomato" /> Cart List</Text>
+        <View style={{ width: "90%", height: "8%", flexDirection: 'row', backgroundColor: "#dff", marginHorizontal: "5%", opacity: 0.7, borderRadius: 10 }}>
+          <Text style={{ fontWeight: "bold", color: "#000", fontSize: 25, marginHorizontal: "14%", marginVertical: "2%", textAlign: "left" }}><Icon name="shopping-cart" size={30} color="tomato" /> Cart List</Text>
         </View>
         <View style={cartStyles.container}>
           <View style={cartStyles.menuContainer}>
             <View style={{ flexDirection: 'row' }}>
-              <View style={{ width: "55%" }}>
-                <Text style={{ fontWeight: "bold", fontSize: 17, marginHorizontal: "14%", marginVertical: "5%", textAlign: "left" }}>Name</Text>
+              <View style={{ width: "50%" }}>
+                <Text style={cartStyles.textHeader}>Name</Text>
               </View>
-              <View style={{ width: "25%" }}>
-                <Text style={{ fontWeight: "bold", fontSize: 17, marginHorizontal: "14%", marginVertical: "10%", textAlign: "left" }}>Price</Text>
+              <View style={{ width: "50%" }}>
+                <Text style={cartStyles.textHeader}>Price</Text>
               </View>
             </View>
-            <View style={{ borderBottomColor: 'black', borderBottomWidth: 2, marginBottom: "5%" }} />
+            <View style={{ borderBottomColor: 'black', borderBottomWidth: 2 }} />
 
             <FlatList
               data={data}
-              renderItem={renderItem}
-              keyExtractor={(item, index) => index.toString()} // Use the index as the key
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem} 
             />
           </View>
         </View>
       </SafeAreaView>
     </ImageBackground>
   );
+  //End return CartScreen
 }
 //End CartScreen
 
@@ -308,6 +325,19 @@ const cartStyles = StyleSheet.create({
     position: "relative",
     right: 0,
   },
+  textItem: {
+    marginLeft: "3%",
+    marginBottom: "5%",
+    fontWeight: "400",
+    fontSize: 20
+  },
+  textHeader: {
+    fontWeight: "bold",
+    fontSize: 17,
+    marginHorizontal: "14%",
+    marginVertical: "5%",
+    textAlign: "left"
+  }
 });
 //End cartStyles
 
@@ -405,7 +435,7 @@ function Login() {
       password: password
     };
 
-    fetch(baseUrl + "people/getPerson", {
+    fetch(baseUrl + "customer/getPerson", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -444,7 +474,8 @@ function Login() {
         <TextInput keyboardType='email-address' style={loginStyles.input} onChangeText={newText => setEmail(newText.toString())}>Yousef@yahoo.co</TextInput>
 
         <Text style={loginStyles.lable}>Password</Text>
-        <TextInput secureTextEntry={true} keyboardType='visible-password' style={loginStyles.input} onChangeText={newText => setPassword(newText.toString())}></TextInput>
+        <TextInput secureTextEntry={true} keyboardType='visible-password' style={loginStyles.input} onChangeText={newText => setPassword(md5(newText.toString()))}></TextInput>
+        <Text>{password}</Text>
         <View style={loginStyles.buttonsBox}>
           <Pressable style={loginStyles.buttonContainer} onPress={() => navigation.navigate("Register")}  >
 
@@ -537,7 +568,7 @@ function Register() {
         password: password
       };
 
-      fetch(baseUrl + "people", {
+      fetch(baseUrl + "customer", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -574,12 +605,10 @@ function Register() {
         <TextInput keyboardType='phone-pad' style={registerStyles.Input} onChangeText={newText => setPhone(newText.toString())}></TextInput>
 
         <Text style={registerStyles.Lable}>Password</Text>
-        <TextInput secureTextEntry={true} keyboardType='visible-password' style={registerStyles.Input} onChangeText={newText => setPassword(newText.toString())}></TextInput>
+        <TextInput secureTextEntry={true} keyboardType='visible-password' style={registerStyles.Input} onChangeText={newText => setPassword(md5(newText.toString()))}></TextInput>
 
         <Text style={registerStyles.Lable}>Confirm Password</Text>
-        <TextInput secureTextEntry={true} keyboardType='visible-password' style={registerStyles.Input} onChangeText={newText => setConfirmPassword(newText.toString())}></TextInput>
-
-
+        <TextInput secureTextEntry={true} keyboardType='visible-password' style={registerStyles.Input} onChangeText={newText => setConfirmPassword(md5(newText.toString()))}></TextInput>
 
         <Pressable style={registerStyles.Button} onPress={registerCusomer}>
 
@@ -754,8 +783,6 @@ const customerStyles = StyleSheet.create({
   }
 })
 //End customerStyles
-
-
 
 
 //Start App

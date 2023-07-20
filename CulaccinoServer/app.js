@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const peoplePath=require('./routes/peoples') 
+const customerPath=require('./routes/customers') 
 const menuPath=require('./routes/items') 
 const orderPath=require('./routes/orders') 
 
@@ -24,7 +24,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/culaccinoDB', {
 
 
 
-app.use("/api/people",peoplePath)
+app.use("/api/customer",customerPath)
 app.use("/api/menu",menuPath)
 app.use("/api/order",orderPath)
 

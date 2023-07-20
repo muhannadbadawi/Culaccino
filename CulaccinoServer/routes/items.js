@@ -35,20 +35,6 @@ router.get("/get/:id",async(req,res)=>{
 });
 
 
-function getpricess(id){
-    try {
-        const item = Menu.findById(id);
-        if(item){
-            return item.price*item.quantities;
-        }else{
-            return 0;
-        }
-    } catch (error) {
-        console.log(error);
-        return 0;
-    }
-}
-
 /**
  * @desc Add New Item
  * @route /api/item

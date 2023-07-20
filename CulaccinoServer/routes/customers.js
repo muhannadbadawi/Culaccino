@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
-const { People } = require('../models/People');
+const { Customer } = require('../models/Customer');
 
 
 /**
- * @desc Get All People
- * @route /api/people/getAll
+ * @desc Get All Customer
+ * @route /api/customer/getAll
  * @method GET
  */
 router.get("/getAll", async (req, res) => {
-    const peopleList = await People.find();
-    res.status(200).json(peopleList);
+    const customerList = await Customer.find();
+    res.status(200).json(customerList);
 
 })
 
@@ -19,14 +19,14 @@ router.get("/getAll", async (req, res) => {
 
 /**
  * @desc Delete person
- * @route /api/people/:id
+ * @route /api/customer/:id
  * @method DELETE
  */
 router.delete("/:id", async (req, res) => {
     try {
-        const person = await People.findById(req.params.id);
+        const person = await Customer.findById(req.params.id);
         if (person) {
-            await People.findByIdAndDelete(req.params.id);
+            await Customer.findByIdAndDelete(req.params.id);
             res.status(200).json({ message: "person has been deleted" })
         }
         else {
@@ -41,51 +41,23 @@ router.delete("/:id", async (req, res) => {
 
 /**
  * @desc get person without password
- * @route /api/people
+ * @route /api/customer
  * @method POST
  */
-// router.post("/getPerson", async (req, res) => {
-
-
-//     try {
-//         const peopleList = await People.find();
-//         foundIt = "false";
-//         peopleList.forEach(element => {
-//             if (element.email == req.body.email && element.password == req.body.password) {
-//                 foundIt = "true";
-//                 console.log(foundIt)
-//                 const person = new People(
-//                     {
-//                         id:element._id,
-//                         name: element.name,
-//                         email: element.email
-//                     }
-//                 );   
-//                 return res.status(200).json(person)
-//             }
-//             else {
-//                 console.log("person not found")
-//             }
-//         });
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ message: "Something went wrong" });
-//     }
-// })
 router.post("/getPerson", async (req, res) => {
     const getPerson = {
         id: "",
         name: "",
-        phone:"",
+        phone: "",
         email: ""
     };
     try {
-        const person = await People.findOne(req.body);
+        const person = await Customer.findOne(req.body);
 
         if (person) {
             getPerson.id = person._id;
             getPerson.name = person.name;
-            getPerson.phone=person.phone;
+            getPerson.phone = person.phone;
             getPerson.email = person.email;
             console.log(req.body);
             res.json(getPerson);
@@ -102,7 +74,7 @@ router.post("/getPerson", async (req, res) => {
 
 /**
  * @desc Add New person
- * @route /api/people
+ * @route /api/customer
  * @method POST
  */
 router.post("/", async (req, res) => {
@@ -112,10 +84,10 @@ router.post("/", async (req, res) => {
     }
 
     try {
-        const person = new People(
+        const person = new Customer(
             {
                 name: req.body.name,
-                phone:req.body.phone,
+                phone: req.body.phone,
                 email: req.body.email,
                 password: req.body.password
             }
@@ -127,6 +99,41 @@ router.post("/", async (req, res) => {
         res.status(500).json({ message: "Something went wrong" });
     }
 });
+
+
+/**
+ * @desc Update customer information
+ * @route /api/customer/:id
+ * @method PUT
+ */
+router.put("/update/:id", async (req, res) => {
+    try {
+        const p =await Customer.findById(req.params.id);
+        if(p){
+            if(req.body.oldPass===p.password){
+                const person = await Customer.findByIdAndUpdate(req.params.id, {
+                    $set: {
+                        name: req.body.newInfo.name,
+                        email: req.body.newInfo.email,
+                        phone: req.body.newInfo.phone,
+                        password:req.body.newInfo.password,
+                    }
+                },
+                    { new: true })
+                res.status(200).json(person)
+            }
+            else{
+                res.status(404).json({message:"Password error"});
+            }
+        }else{
+            res.status(404).json({message:"person not found"});
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message:"Something went wrong"});
+    }
+   
+})
 
 function validateCreatePerson(obj) {
     const schema = Joi.object({
