@@ -132,9 +132,6 @@ const loginStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "400"
   },
-
-
-
 });
 //End loginStyles
 

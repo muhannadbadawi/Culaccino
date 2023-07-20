@@ -7,7 +7,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './Home';
 import Cart from './Cart';
 import Profile from './Profile';
-import Login from './Login';
 const Tab = createBottomTabNavigator();
 
 const baseUrl = "http://192.168.100.5:5000/api/";

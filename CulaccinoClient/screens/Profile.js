@@ -57,7 +57,6 @@ function Profile() {
 
                 <Text style={profileStyles.Lable}>Phone Number</Text>
                 <TextInput keyboardType='phone-pad' style={profileStyles.Input} onChangeText={newText => setPhoneShare(newText.toString())}>{phoneShare}</TextInput>
-
             </Pressable>
 
         </ImageBackground>
