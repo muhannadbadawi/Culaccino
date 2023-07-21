@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const { Customer } = require('../models/Customer');
-const e = require("express");
 
 
 /**
@@ -20,7 +19,7 @@ router.get("/getAll", async (req, res) => {
 
 /**
  * @desc Delete person
- * @route /api/customer/:id
+ * @route /api/delCustomer/:id
  * @method DELETE
  */
 router.delete("/:id", async (req, res) => {
@@ -93,7 +92,13 @@ router.post("/", async (req, res) => {
                 password: req.body.password
             }
         );
-        const result = await person.save();
+        await person.save();
+        const result =
+        {
+            name: person.name,
+            phone: person.phone,
+            email: person.email,
+        }
         res.status(201).json(result);
     } catch (error) {
         console.log(error);
@@ -121,7 +126,7 @@ router.put("/update/:id", async (req, res) => {
                 { new: true })
             res.status(200).json({ message: "changed successfully!" })
         }
-        else{
+        else {
             res.status(404).json({ message: "The password is wrong" });
         }
 

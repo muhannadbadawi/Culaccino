@@ -5,15 +5,15 @@ const CustomerSchema =new mongoose.Schema({
         type:String,
         required:true,
         trim:true,
-        minlength:3,
-        maxlength:200
+        minlength:1,
+        maxlength:500
     },
     email:{
         type:String,
         required:true,
         trim:true,
         minlength:6,
-        maxlength:200
+        maxlength:500
     },
     phone:{
         type:String,
@@ -26,8 +26,8 @@ const CustomerSchema =new mongoose.Schema({
         type:String,
         required:true,
         trim:true,
-        minlength:8,
-        maxlength:200
+        minlength:1,
+        maxlength:500
     },
     
 

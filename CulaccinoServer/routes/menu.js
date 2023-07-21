@@ -12,7 +12,6 @@ const Joi = require("joi");
 router.get("/getAll", async (req, res) => {
     const itemList = await Menu.find();
     res.status(200).json(itemList);
-
 })
 
 /**
@@ -47,12 +46,7 @@ router.post("/", async (req, res) => {
                 name: req.body.name,
                 price: req.body.price,
                 description: req.body.description,
-                zerostar:0,
-                onestar:0,
-                twostar:0,
-                threestar:0,
-                fourstar:0,
-                fivestar:0
+                AVG:0,
             }
         );
         const result = await item.save();
@@ -74,12 +68,7 @@ router.put("/update/:id", async (req,res)=>{
             name:req.body.name,
             price:req.body.price,
             description:req.body.description,
-            zerostar:req.body.zerostar,
-            onestar:req.body.onestar,
-            twostar:req.body.twostar,
-            threestar:req.body.threestar,
-            fourstar:req.body.fourstar,
-            fivestar:req.body.fivestar
+            AVG:req.body.AVG
         }},
         {new : true})
     res.status(200).json(item)

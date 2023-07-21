@@ -49,7 +49,7 @@ const renderItem = ({ item, handleDecrement, handleIncrement }) => {
         <Text style={cartStyles.textItem}>{item.name}</Text>
       </View>
       <View style={{ width: "20%" }}>
-        <Text style={cartStyles.textItem}>{price} JD</Text>
+        <Text style={cartStyles.textItem}>{price} JOD</Text>
       </View>
       <TouchableOpacity onPress={() => handleDecrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 18 }}>
         <Icon name="remove-circle" style={cartStyles.quantityButton} color="tomato" />
@@ -131,7 +131,7 @@ function Cart() {
         'Content-Type': 'application/json',
         // Add any other headers required by your API
       },
-      body: JSON.stringify({ customerId, items }) // Convert the data to JSON string
+      body: JSON.stringify({ totalPrice,customerId, items }) // Convert the data to JSON string
     })
   }
 
@@ -167,7 +167,7 @@ function Cart() {
               </View>
               <View>
                 <Text>
-                  {totalPrice} JD
+                  {totalPrice} JOD
                 </Text>
               </View>
             </Pressable>

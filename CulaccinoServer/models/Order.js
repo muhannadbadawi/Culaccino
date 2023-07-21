@@ -12,11 +12,6 @@ const OrderSchema = new mongoose.Schema({
         type: Number,
         required: true,
         trim: true,
-    },
-    status: {
-        type: Boolean,
-        required: true,
-        trim: true,
     }
 
 

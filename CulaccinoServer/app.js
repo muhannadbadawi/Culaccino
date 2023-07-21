@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const customerPath=require('./routes/customers') 
-const menuPath=require('./routes/items') 
+const menuPath=require('./routes/menu') 
 const orderPath=require('./routes/orders') 
 
 

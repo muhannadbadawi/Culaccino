@@ -5,7 +5,6 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 
-
 /**
  * @desc Get All Items Order
  * @route /api/order/getAllItemsOrder
@@ -27,20 +26,62 @@ router.get("/getAllOrder", async (req, res) => {
 })
 
 
-//this method get price for item have this id
-async function getprice(id) {
+/**
+ * @desc Get Order By Customer Id
+ * @route /api/order/getOrder
+ * @method POST
+ */
+router.post("/getOrder", async (req, res) => {
+    const getOrder = {
+        _id: "",
+        customerId: "",
+        totalPric: 0,
+        updatedAt:""
+    };
+
     try {
-        const item = await Menu.findById(id);
+        const item = await Order.find(req.body);
         if (item) {
-            return item.price;
+            getOrder._id = item._id;
+            getOrder.customerId = item.customerId;
+            getOrder.totalPric = item.totalPric;
+            getOrder.updatedAt=item.updatedAt
+            const list=[]
+            item.forEach(element => {
+                if (element.status) {
+                    list.push(element)
+                }
+            });
+            res.status(200).json(list);
+
+
         } else {
-            return 0;
+            res.status(404).json({ message: "Item not found" });
         }
     } catch (error) {
         console.log(error);
-        return 0;
+        res.status(500).json({ message: "Something went wrong" });
     }
-}
+});
+
+/**
+ * @desc Get Items of Order By Order Id
+ * @route /api/order/getItemsOrder
+ * @method POST
+ */
+router.post("/getItemsOrder", async (req, res) => {
+    try {
+        const item = await ItemsOrder.find(req.body);
+        if (item) {
+            res.status(200).json(item);
+        } else {
+            res.status(404).json({ message: "Item not found" });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Something went wrong" });
+    }
+});
 
 /**
  * @desc Add New Order
@@ -50,21 +91,13 @@ async function getprice(id) {
 router.post("/", async (req, res) => {
     try {
         const list = req.body.items;
-        let totalPrice = 0;
-        for (const element of list) {
-            const price = await getprice(element.id);
-            const totalPriceForItem = price * element.quantity;
-            totalPrice += totalPriceForItem;
-            console.log(totalPriceForItem);
-        }
         const newOrder = new Order(
             {
                 customerId: req.body.customerId,
-                totalPrice: totalPrice,
-                status: 0
+                totalPrice: req.body.totalPrice,
             }
         )
-        
+
         newOrder.save();
 
         list.forEach(element => {
@@ -72,7 +105,9 @@ router.post("/", async (req, res) => {
                 {
                     itemId: element.id,
                     orderId: newOrder._id,
-                    quantity: element.quantity
+                    quantity: element.quantity,
+                    rate:0,
+                    status:0
                 }
             );
 
@@ -91,28 +126,28 @@ router.post("/", async (req, res) => {
 
 
 
-/**
- * @desc Update an Item
- * @route /api/item/:id
- * @method PUT
- */
-router.put("/update/:id", async (req, res) => {
-    const item = await Menu.findByIdAndUpdate(req.params.id, {
-        $set: {
-            name: req.body.name,
-            price: req.body.price,
-            description: req.body.description,
-            zerostar: req.body.zerostar,
-            onestar: req.body.onestar,
-            twostar: req.body.twostar,
-            threestar: req.body.threestar,
-            fourstar: req.body.fourstar,
-            fivestar: req.body.fivestar
-        }
-    },
-        { new: true })
-    res.status(200).json(item)
-})
+    /**
+     * @desc Update an Item
+     * @route /api/item/:id
+     * @method PUT
+     */
+    router.put("/update/:id", async (req, res) => {
+        const item = await Menu.findByIdAndUpdate(req.params.id, {
+            $set: {
+                name: req.body.name,
+                price: req.body.price,
+                description: req.body.description,
+                zerostar: req.body.zerostar,
+                onestar: req.body.onestar,
+                twostar: req.body.twostar,
+                threestar: req.body.threestar,
+                fourstar: req.body.fourstar,
+                fivestar: req.body.fivestar
+            }
+        },
+            { new: true })
+        res.status(200).json(item)
+    })
 
 
 module.exports = router;

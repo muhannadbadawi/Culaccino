@@ -12,7 +12,7 @@ const ItemsOrderSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        minlength: 3,
+        minlength: 1,
         maxlength: 500
     },
     quantity: {
@@ -20,6 +20,16 @@ const ItemsOrderSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    rate: {
+        type: Number,
+        required: true,
+        trim: true,
+    },
+    status: {
+        type: Boolean,
+        required: true,
+        trim: true,
+    }
 
 
 },

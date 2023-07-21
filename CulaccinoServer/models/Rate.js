@@ -1,31 +1,23 @@
 const mongoose = require("mongoose");
 
-const MenuSchema = new mongoose.Schema({
-    name: {
+const RateSchema = new mongoose.Schema({
+    itemId: {
         type: String,
         required: true,
         trim: true,
         minlength: 1,
         maxlength: 500
     },
-    price: {
+    ratersNumber: {
         type: Number,
         required: true,
         trim: true,
     },
-    description: {
-        type: String,
-        required: true,
-        trim: true,
-        minlength: 1,
-        maxlength: 500
-    },
-    AVG: {
+    totalrate: {
         type: Number,
         required: true,
         trim: true,
     }
-
 
 
 },
@@ -34,7 +26,7 @@ const MenuSchema = new mongoose.Schema({
     }
 );
 
-const Menu = mongoose.model("Menu", MenuSchema);
+const Rate = mongoose.model("Rate", RateSchema);
 module.exports = {
-    Menu
+    Rate
 }

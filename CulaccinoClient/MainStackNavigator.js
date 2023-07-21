@@ -5,6 +5,7 @@ import Login from './screens/Login';
 import Register from './screens/Register';
 import Customer from './screens/Customer';
 import Home from './screens/Home';
+import PreviousOrder from './screens/PreviousOrder';
 import Cart from './screens/Cart';
 import Profile from './screens/Profile';
 import Logout from './screens/Logout';
@@ -21,6 +22,7 @@ const MainStackNavigator = () => {
       </Stack.Group>
       <Stack.Group>
         <Stack.Screen name='Home' component={Home} />
+        <Stack.Screen name='PreviousOrder' component={PreviousOrder} />
         <Stack.Screen name='Cart' component={Cart} />
         <Stack.Screen name='Profile' component={Profile} />
         <Stack.Screen name='Logout' component={Logout} />

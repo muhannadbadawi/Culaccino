@@ -1,6 +1,6 @@
-import { View, TouchableOpacity, Alert, Text, FlatList, ImageBackground, TextInput, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Alert, Text, Pressable,FlatList, ImageBackground, TextInput, StyleSheet } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { useIsFocused } from "@react-navigation/native";
+import { useIsFocused ,useNavigation} from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -13,6 +13,7 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cartItems, setCartItems] = useState([]);
   const isFocused = useIsFocused();
+  const navigation = useNavigation(); // Initialize the navigation object
 
   useEffect(() => {
     fetch(baseUrl + 'menu/getAll')
@@ -30,7 +31,7 @@ function Home() {
       .catch((error) => console.error('Error retrieving cart data:', error));
   }, [isFocused]);
 
-  
+
   const filteredData = menuItems.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
 
@@ -63,15 +64,14 @@ function Home() {
       console.error('Error retrieving/updating cart data:', error);
     }
   };
-
   //list items body 
   const renderItem = ({ item }) => {
     // Check if the item exists in AsyncStorage cart
     const cartItem = cartItems.find((cartItem) => cartItem.id === item._id);
     const quantity = cartItem ? cartItem.quantity : 0;
-
+  
     return (
-      <TouchableOpacity onPress={() => Alert.alert(item.description)} style={homeStyles.itemContainer}>
+      <TouchableOpacity style={homeStyles.itemContainer}>
         <View style={{ width: '10%' }}>
           <Text style={homeStyles.textItem}>
             ({quantity})
@@ -84,7 +84,7 @@ function Home() {
         </View>
         <View style={{ width: '30%' }}>
           <Text style={homeStyles.textItem}>
-            {item.price} JD
+            {item.price} JOD
           </Text>
         </View>
         <View>
@@ -103,18 +103,19 @@ function Home() {
     );
   };
 
-
   //Stert return HomeScreen
   return (
     <ImageBackground source={require('../assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
-      <SafeAreaView style={{ height: '94%' }}>
+      <SafeAreaView>
         {/* Add a text input for search */}
-        <TextInput
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-          placeholder="Search by name"
-          style={homeStyles.searchItemInput}
-        />
+        <View style={{ flexDirection: 'row',height:"8%"}}>
+          <TextInput
+            value={searchQuery}
+            onChangeText={(text) => setSearchQuery(text)}
+            placeholder="Search by name"
+            style={homeStyles.searchItemInput}
+          />
+        </View>
 
         <View style={homeStyles.container}>
           <View style={homeStyles.menuContainer}>
@@ -124,7 +125,6 @@ function Home() {
               <Text style={homeStyles.headerText}>Price</Text>
             </View>
             <View style={homeStyles.separator} />
-
             {/* display the items  */}
             <FlatList
               data={filteredData}
@@ -144,13 +144,12 @@ function Home() {
 const homeStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
     backgroundColor: "#dff",
-    margin: "3%",
+    marginTop:0,
+    marginHorizontal: "5%",
     borderRadius: 10,
     opacity: 0.8,
-    height: "100%",
+    height: "92%",
   },
   menuContainer: {
     flex: 1,
@@ -171,10 +170,10 @@ const homeStyles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: "5%",
     width: "90%",
-    height: "8%",
+    height: "90%",
     backgroundColor: "#fff",
     padding: "4%",
-    fontSize: 15,
+    fontSize: 18,
     borderRadius: 10
   },
   headerContainer: {
@@ -195,6 +194,20 @@ const homeStyles = StyleSheet.create({
   },
   itemContainer: {
     flexDirection: 'row',
+  },
+  buttonContainer: {
+    justifyContent: 'center', // Center items horizontally
+    width: "25%",
+    height: "40%",
+    backgroundColor: "#fff",
+    padding: "1%",
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: 'black',
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: "400"
   },
 });
 //End homeStyles
