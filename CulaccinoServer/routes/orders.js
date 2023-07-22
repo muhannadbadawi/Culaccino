@@ -5,6 +5,14 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const { Rate } = require('../models/Rate');
+const nodmailer = require('nodemailer')
+const mailTransporter = nodmailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: "culaccino70@gmail.com",
+        pass: "wgdwvfrdwnfzdsys"
+    }
+})
 
 /**
  * @desc Get All Items Order
@@ -131,57 +139,74 @@ router.post("/", async (req, res) => {
  * @method POST
  */
 router.post("/update", async (req, res) => {
-    const itemId = req.body.itemId;
-    const io={
-        itemId:req.body.itemId,
-        orderId:req.body.orderId
-    }
-    const item = await ItemsOrder.find(io);
-    if(!item.status){
-        try {
-            const updatedItem = await ItemsOrder.updateOne(
-                { itemId: req.body.itemId, orderId: req.body.orderId },
-                {
-                    $set: {
-                        rate: parseInt(req.body.rate),
-                        status: true,
-                    },
-                }
-            );
     
-            const rate = await Rate.findOne({ itemId });
-            if (!rate) {
-                const newRate = new Rate(
-                    {
-                        itemId: req.body.itemId,
-                        ratersNumber: 1,
-                        totalrate: parseInt(req.body.rate)
-                    }
-                );
-                await newRate.save();
-            }
-            else {
-                const oldRate = await Rate.updateOne(
-                    { itemId: itemId },
+       
+        const details={
+            from:"culaccino70@gmail.com",
+            to:"muhannadbadawi43@gmail.com",
+            subject:"Test Subject",
+            text:"Thanks For Ratting"
+          }
+        const itemId = req.body.itemId;
+        const io={
+            itemId:req.body.itemId,
+            orderId:req.body.orderId
+        }
+        const item = await ItemsOrder.find(io);
+        if(!item.status){
+            try {
+               
+                const updatedItem = await ItemsOrder.updateOne(
+                    { itemId: req.body.itemId, orderId: req.body.orderId },
                     {
                         $set: {
-                            itemId: rate.itemId,
-                            ratersNumber: 1 + rate.ratersNumber,
-                            totalrate: parseInt(req.params.rate) + rate.totalrate
+                            rate: parseInt(req.body.rate),
+                            status: true,
                         },
                     }
                 );
+        
+                const rate = await Rate.findOne({ itemId });
+                if (!rate) {
+                    const newRate = new Rate(
+                        {
+                            itemId: req.body.itemId,
+                            ratersNumber: 1,
+                            totalrate: parseInt(req.body.rate)
+                        }
+                    );
+                    await newRate.save();
+                }
+                else {
+                    const oldRate = await Rate.updateOne(
+                        { itemId: itemId },
+                        {
+                            $set: {
+                                itemId: rate.itemId,
+                                ratersNumber: 1 + rate.ratersNumber,
+                                totalrate: parseInt(req.params.rate) + rate.totalrate
+                            },
+                        }
+                    );
+                }
+                mailTransporter.sendMail(details,(err)=>{
+                    if(err){
+                      console.log("error"+err)
+                    }
+                    else{
+                      console.log("email has send")
+                    }
+                  })
+                res.status(200).json(rate);
             }
-            res.status(200).json(rate);
+            catch (error) {
+                console.log(error);
+                res.status(500).json("wrong");
+            }
         }
-        catch (error) {
-            console.log(error);
-            res.status(500).json("wrong");
+        else{
+            res.status(404).json("is rate");
         }
-    }
-    else{
-        res.status(404).json("is rate");
-    }
 });
 
 

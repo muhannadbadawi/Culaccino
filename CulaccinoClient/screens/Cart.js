@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, Text, FlatList, ImageBackground, StyleSheet, Pressable } from 'react-native';
+import { View, TouchableOpacity, Text, FlatList, ImageBackground, StyleSheet, Pressable, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useIsFocused } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -130,6 +130,7 @@ function Cart() {
         updatedData.splice(0, updatedData.length);
         setData([]); // Empty the cart items state
         saveDataToAsyncStorage("cartItems",updatedData);
+        Alert.alert("Thank you for ordering from culacccino Please rate the order")
       })
       .catch((error) => {
         console.error('Error during checkout:', error);
