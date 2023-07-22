@@ -127,24 +127,23 @@ router.post("/", async (req, res) => {
 
 /**
  * @desc Ratting Item
- * @route /api/order/rate
- * @method PUT
+ * @route /api/update/:rate
+ * @method POST
  */
-// router.put("/updateRate/:id", async (req,res)=>{
-//     const item = await ItemsOrder.find(req.params.id)
-//     res.status(200).json(item)
-// })
-router.put("/update/:rate", async (req, res) => {
+router.post("/update", async (req, res) => {
     const itemId = req.body.itemId;
-    const person = await ItemsOrder.find(req.body);
-
-    if(person.status){
+    const io={
+        itemId:req.body.itemId,
+        orderId:req.body.orderId
+    }
+    const item = await ItemsOrder.find(io);
+    if(!item.status){
         try {
             const updatedItem = await ItemsOrder.updateOne(
                 { itemId: req.body.itemId, orderId: req.body.orderId },
                 {
                     $set: {
-                        rate: parseInt(req.params.rate),
+                        rate: parseInt(req.body.rate),
                         status: true,
                     },
                 }
@@ -156,7 +155,7 @@ router.put("/update/:rate", async (req, res) => {
                     {
                         itemId: req.body.itemId,
                         ratersNumber: 1,
-                        totalrate: parseInt(req.params.rate)
+                        totalrate: parseInt(req.body.rate)
                     }
                 );
                 await newRate.save();
@@ -183,9 +182,6 @@ router.put("/update/:rate", async (req, res) => {
     else{
         res.status(404).json("is rate");
     }
-   
-
-
 });
 
 

@@ -6,7 +6,7 @@ import { useIsFocused } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.166:5000/api/";
 
 
 
@@ -17,7 +17,7 @@ function PreviousOrder() {
   const [isItemsVisible, setIsItemsVisible] = useState(false);
   const [itemNames, setItemNames] = useState({});
   const [itemRatings, setItemRatings] = useState({});
-
+  const [rateValue, setRateValue] = useState(0);
 
 
 
@@ -83,27 +83,37 @@ function PreviousOrder() {
       [itemId]: numOfStars,
     }));
   };
-  const submitItemRatings = (orderId) => {
-    // Prepare the ratings data to send to the server
-    const ratingsData = {
-      orderId,
-      ratings: itemRatings,
-    };
+  const submitItemRating = async() => {
 
-    // Make a POST request to send the ratings to the server
-    fetch(baseUrl + "order/submitRatings", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(ratingsData),
-    })
-      .then(response => response.json())
-      .then(responseData => {
-        // Handle the response from the server, if needed
-        console.log("Ratings submitted successfully:", responseData);
-      })
-      .catch(error => console.error('Error submitting ratings:', error));
+    try {
+      for (const element of items) {
+        const ratingsData = {
+          itemId: element.itemId,
+          orderId: element.orderId,
+          rate: itemRatings[element.itemId]
+        };
+  
+        const response = await fetch(baseUrl + "order/update", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(ratingsData),
+        });
+  
+        if (!response.ok) {
+          // Handle non-successful response (e.g., server error, not found, etc.)
+          throw new Error('Failed to submit item rating');
+        }
+      }
+  
+      // All PUT requests completed successfully, hide the modal
+      handleHideItemdModal();
+    } catch (error) {
+      console.error('Error submitting item ratings:', error);
+      // Handle the error as needed (e.g., show an error message to the user)
+    }
+
   };
 
   const renderOrder = ({ item }) => {
@@ -171,9 +181,7 @@ function PreviousOrder() {
     setIsItemsVisible(true);
 
   };
-  const handleHideItemdModal = (orderId) => {
-    submitItemRatings(orderId);
-
+  const handleHideItemdModal = () => {
     setIsItemsVisible(false);
   };
   return (
@@ -190,10 +198,10 @@ function PreviousOrder() {
             <FlatList
               data={items}
               keyExtractor={(items) => items._id}
-              renderItem={({ item }) => renderItems({ item ,showStars})}
+              renderItem={({ item }) => renderItems({ item, showStars })}
             />
             <View style={previousOrderStyles.buttonContainer}>
-              <Button title="Submit" onPress={handleHideItemdModal} color="#2980B9" />
+              <Button title="Submit" onPress={submitItemRating} color="#2980B9" />
             </View>
             <View style={previousOrderStyles.buttonContainer}>
               <Button title="Cancel" onPress={handleHideItemdModal} color="#E74C3C" />

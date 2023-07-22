@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.166:5000/api/";
 
 //Start Home
 function Home() {

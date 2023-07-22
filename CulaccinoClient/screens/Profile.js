@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 import md5 from 'md5';
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.166:5000/api/";
 
 const Profile = () => {
     const [idShare, setIdShare] = useState('');
