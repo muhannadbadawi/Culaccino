@@ -33,14 +33,13 @@ function Login() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Add any other headers required by your API
       },
       body: JSON.stringify(postData) // Convert the data to JSON string
     })
       .then(response => response.json())
       .then(responseData => {
         // Handle the response data
-        if (responseData.name != undefined) {
+        if (responseData.message === "ok") {
           AsyncStorage.setItem("name", responseData.name);
           AsyncStorage.setItem("id", responseData.id);
           AsyncStorage.setItem("email", responseData.email);
@@ -49,9 +48,10 @@ function Login() {
           console.log("Login successful");
           navigation.navigate("Customer")
         }
-        else {
-          Alert.alert("Wrong email or password")
+        else{
+          Alert.alert(responseData.message)
         }
+
       })
       .catch(error => {
         // Handle any errors

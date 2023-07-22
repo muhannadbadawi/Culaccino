@@ -28,13 +28,11 @@ function Register() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Add any other headers required by your API
                 },
                 body: JSON.stringify(postData) // Convert the data to JSON string
             })
                 .then(response => response.json())
                 .then(responseData => {
-                    // Handle the response data
                     console.log("Done");
                     navigation.navigate("Login")
                 })

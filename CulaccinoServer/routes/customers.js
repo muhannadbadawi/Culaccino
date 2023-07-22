@@ -49,23 +49,33 @@ router.post("/getPerson", async (req, res) => {
         id: "",
         name: "",
         phone: "",
-        email: ""
+        email: "",
+        message:""
     };
+    const e={email:req.body.email}
     try {
-        const person = await Customer.findOne(req.body);
+        const person = await Customer.findOne(e);
 
-        if (person) {
-            getPerson.id = person._id;
-            getPerson.name = person.name;
-            getPerson.phone = person.phone;
-            getPerson.email = person.email;
-            console.log(req.body);
-            res.json(getPerson);
-        } else {
-            res.status(404).json({ error: 'Person not found' });
+        if(person){
+            if (person.password===req.body.password) {
+                getPerson.id = person._id;
+                getPerson.name = person.name;
+                getPerson.phone = person.phone;
+                getPerson.email = person.email;
+                getPerson.message="ok";
+                console.log(req.body);
+                res.json(getPerson);
+            } else {
+                getPerson.message="password wrong";
+                res.status(404).json(getPerson);
+            }
+        }
+        else {
+            getPerson.message="not found";
+            res.status(404).json(getPerson);
         }
     } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json(error);
     }
 });
 

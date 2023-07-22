@@ -123,7 +123,7 @@ function Home() {
   return (
     <ImageBackground source={require('../assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
       <SafeAreaView>
-        {/* Add a text input for search */}
+        {/* Text Input for search */}
         <View style={{ flexDirection: 'row', height: "8%" }}>
           <TextInput
             value={searchQuery}

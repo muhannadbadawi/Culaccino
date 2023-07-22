@@ -57,9 +57,6 @@ const Profile = () => {
         setInfoModalVisible(false);
     };
     const handleInfoChange = () => {
-        
-            // Perform password change logic here
-            // If successful, show a success message, else show an error message.
             const postData = {
                 "name": nameShare,
                 "email": emailShare,
@@ -70,7 +67,6 @@ const Profile = () => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Add any other headers required by your API
                 },
                 body: JSON.stringify(postData) // Convert the data to JSON string
             })
@@ -89,8 +85,6 @@ const Profile = () => {
     };
     const handlePasswordChange = () => {
         if (newPassword === confirmPassword) {
-            // Perform password change logic here
-            // If successful, show a success message, else show an error message.
             const postData = {
                 oldPassword: md5(oldPassword),
                 newPassword: md5(newPassword)
@@ -99,7 +93,6 @@ const Profile = () => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Add any other headers required by your API
                 },
                 body: JSON.stringify(postData) // Convert the data to JSON string
             })

@@ -107,7 +107,7 @@ function PreviousOrder() {
         }
       }
   
-      // All PUT requests completed successfully, hide the modal
+      // All requests completed successfully, hide the modal
       handleHideItemdModal();
     } catch (error) {
       console.error('Error submitting item ratings:', error);
