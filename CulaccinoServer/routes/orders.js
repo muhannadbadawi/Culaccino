@@ -134,6 +134,59 @@ router.post("/", async (req, res) => {
 //     const item = await ItemsOrder.find(req.params.id)
 //     res.status(200).json(item)
 // })
+router.put("/update/:rate", async (req, res) => {
+    const itemId = req.body.itemId;
+    const person = await ItemsOrder.find(req.body);
+
+    if(person.status){
+        try {
+            const updatedItem = await ItemsOrder.updateOne(
+                { itemId: req.body.itemId, orderId: req.body.orderId },
+                {
+                    $set: {
+                        rate: parseInt(req.params.rate),
+                        status: true,
+                    },
+                }
+            );
+    
+            const rate = await Rate.findOne({ itemId });
+            if (!rate) {
+                const newRate = new Rate(
+                    {
+                        itemId: req.body.itemId,
+                        ratersNumber: 1,
+                        totalrate: parseInt(req.params.rate)
+                    }
+                );
+                await newRate.save();
+            }
+            else {
+                const oldRate = await Rate.updateOne(
+                    { itemId: itemId },
+                    {
+                        $set: {
+                            itemId: rate.itemId,
+                            ratersNumber: 1 + rate.ratersNumber,
+                            totalrate: parseInt(req.params.rate) + rate.totalrate
+                        },
+                    }
+                );
+            }
+            res.status(200).json(rate);
+        }
+        catch (error) {
+            console.log(error);
+            res.status(500).json("wrong");
+        }
+    }
+    else{
+        res.status(404).json("is rate");
+    }
+   
+
+
+});
 
 
 
