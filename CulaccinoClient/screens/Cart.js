@@ -29,41 +29,21 @@ const getDataFromAsyncStorage = async () => {
 };
 
 // Helper function to save cart data to AsyncStorage
-const saveDataToAsyncStorage = async (cartData) => {
+const saveDataToAsyncStorage = async (keyName, data) => {
   try {
-    await AsyncStorage.setItem('cartItems', JSON.stringify(cartData));
+    await AsyncStorage.setItem(keyName, JSON.stringify(data));
   } catch (error) {
     console.error('Error saving data to AsyncStorage:', error);
   }
 };
 
 // Function to render each item in the cart
-const renderItem = ({ item, handleDecrement, handleIncrement }) => {
-  const price = item.price * item.quantity;
-  return (
-    <SafeAreaView style={{ flexDirection: 'row' }}>
-      <View style={{ width: "10%" }}>
-        <Text style={{ fontSize: 18, color: "green" }}>{item.quantity} ×</Text>
-      </View>
-      <View style={{ width: "50%" }}>
-        <Text style={cartStyles.textItem}>{item.name}</Text>
-      </View>
-      <View style={{ width: "20%" }}>
-        <Text style={cartStyles.textItem}>{price} JOD</Text>
-      </View>
-      <TouchableOpacity onPress={() => handleDecrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 18 }}>
-        <Icon name="remove-circle" style={cartStyles.quantityButton} color="tomato" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleIncrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 18 }}>
-        <Icon name="add-circle" style={cartStyles.quantityButton} color="tomato" />
-      </TouchableOpacity>
-    </SafeAreaView>
-  )
-};
+
 function Cart() {
   const [data, setData] = useState([]);
   const [customerId, setCustomerId] = useState('');
   const isFocused = useIsFocused();
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem('id')
@@ -77,7 +57,30 @@ function Cart() {
     getDataFromAsyncStorage().then((parsedData) => {
       setData(parsedData);
     });
-  }, [isFocused]);
+  }, [isFocused, refresh]);
+  const renderItem = ({ item, handleDecrement, handleIncrement }) => {
+
+    const price = item.price * item.quantity;
+    return (
+      <SafeAreaView style={{ flexDirection: 'row' }}>
+        <View style={{ width: "10%" }}>
+          <Text style={{ fontSize: 18, color: "green" }}>{item.quantity} ×</Text>
+        </View>
+        <View style={{ width: "45%" }}>
+          <Text style={cartStyles.textItem}>{item.name}</Text>
+        </View>
+        <View style={{ width: "25%" }}>
+          <Text style={cartStyles.textItem}>{price} JOD</Text>
+        </View>
+        <TouchableOpacity onPress={() => handleDecrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 18 }}>
+          <Icon name="remove-circle" style={cartStyles.quantityButton} color="tomato" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleIncrement(item.id)} style={{ marginLeft: "2%", fontWeight: "500", fontSize: 18 }}>
+          <Icon name="add-circle" style={cartStyles.quantityButton} color="tomato" />
+        </TouchableOpacity>
+      </SafeAreaView>
+    )
+  };
 
   const handleIncrement = (itemId) => {
     const existingItems = data.findIndex((item) => item.id === itemId);
@@ -87,17 +90,8 @@ function Cart() {
       const updatedData = [...data];
       updatedData[existingItems].quantity += 1;
       setData(updatedData);
-      saveDataToAsyncStorage(updatedData); // Save the updated data to AsyncStorage
-    } else {
-      // Item does not exist in the cart, add it with quantity 1
-      const itemToAdd = data.find((item) => item.id === itemId);
-
-      if (itemToAdd) {
-        const updatedData = [...data, { ...itemToAdd, quantity: 1 }];
-        setData(updatedData);
-        saveDataToAsyncStorage(updatedData); // Save the updated data to AsyncStorage
-      }
-    }
+      saveDataToAsyncStorage("cartItems",updatedData); // Save the updated data to AsyncStorage
+    } 
   };
 
   // Function to handle decrementing the quantity of an item in the cart
@@ -116,25 +110,31 @@ function Cart() {
       }
 
       setData(updatedData);
-      saveDataToAsyncStorage(updatedData); // Save the updated data to AsyncStorage
+      saveDataToAsyncStorage("cartItems",updatedData); // Save the updated data to AsyncStorage
     }
   };
 
   const totalPrice = data.reduce((total, item) => total + item.price * item.quantity, 0);
-
   const checkout = async () => {
     const items = JSON.parse(await AsyncStorage.getItem('cartItems'));
-
     fetch(baseUrl + "order", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         // Add any other headers required by your API
       },
-      body: JSON.stringify({ totalPrice,customerId, items }) // Convert the data to JSON string
+      body: JSON.stringify({ totalPrice, customerId, items }) // Convert the data to JSON string
     })
-  }
-
+      .then(() => {
+        const updatedData = [...data];
+        updatedData.splice(0, updatedData.length);
+        setData([]); // Empty the cart items state
+        saveDataToAsyncStorage("cartItems",updatedData);
+      })
+      .catch((error) => {
+        console.error('Error during checkout:', error);
+      });
+  };
   return (
     <ImageBackground source={require('../assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
       <SafeAreaView style={{ height: '94%' }}>

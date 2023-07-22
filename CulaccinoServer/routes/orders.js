@@ -4,6 +4,7 @@ const { Menu } = require("../models/Menu")
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
+const { Rate } = require('../models/Rate');
 
 /**
  * @desc Get All Items Order
@@ -36,7 +37,7 @@ router.post("/getOrder", async (req, res) => {
         _id: "",
         customerId: "",
         totalPric: 0,
-        updatedAt:""
+        updatedAt: ""
     };
 
     try {
@@ -45,16 +46,8 @@ router.post("/getOrder", async (req, res) => {
             getOrder._id = item._id;
             getOrder.customerId = item.customerId;
             getOrder.totalPric = item.totalPric;
-            getOrder.updatedAt=item.updatedAt
-            const list=[]
-            item.forEach(element => {
-                if (element.status) {
-                    list.push(element)
-                }
-            });
-            res.status(200).json(list);
-
-
+            getOrder.updatedAt = item.updatedAt
+            res.status(200).json(item);
         } else {
             res.status(404).json({ message: "Item not found" });
         }
@@ -73,7 +66,13 @@ router.post("/getItemsOrder", async (req, res) => {
     try {
         const item = await ItemsOrder.find(req.body);
         if (item) {
-            res.status(200).json(item);
+            const list = [];
+            item.forEach(element => {
+                if (!element.status)
+                    list.push(element);
+            });
+
+            res.status(200).json(list);
         } else {
             res.status(404).json({ message: "Item not found" });
         }
@@ -106,8 +105,8 @@ router.post("/", async (req, res) => {
                     itemId: element.id,
                     orderId: newOrder._id,
                     quantity: element.quantity,
-                    rate:0,
-                    status:0
+                    rate: 0,
+                    status: 0
                 }
             );
 
@@ -126,28 +125,16 @@ router.post("/", async (req, res) => {
 
 
 
-    /**
-     * @desc Update an Item
-     * @route /api/item/:id
-     * @method PUT
-     */
-    router.put("/update/:id", async (req, res) => {
-        const item = await Menu.findByIdAndUpdate(req.params.id, {
-            $set: {
-                name: req.body.name,
-                price: req.body.price,
-                description: req.body.description,
-                zerostar: req.body.zerostar,
-                onestar: req.body.onestar,
-                twostar: req.body.twostar,
-                threestar: req.body.threestar,
-                fourstar: req.body.fourstar,
-                fivestar: req.body.fivestar
-            }
-        },
-            { new: true })
-        res.status(200).json(item)
-    })
+/**
+ * @desc Ratting Item
+ * @route /api/order/rate
+ * @method PUT
+ */
+// router.put("/updateRate/:id", async (req,res)=>{
+//     const item = await ItemsOrder.find(req.params.id)
+//     res.status(200).json(item)
+// })
+
 
 
 module.exports = router;

@@ -1,6 +1,6 @@
-import { View, TouchableOpacity, Alert, Text, Pressable,FlatList, ImageBackground, TextInput, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Alert, Text, Pressable, FlatList, ImageBackground, TextInput, StyleSheet } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { useIsFocused ,useNavigation} from "@react-navigation/native";
+import { useIsFocused, useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -12,13 +12,21 @@ function Home() {
   const [menuItems, setMenuItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [cartItems, setCartItems] = useState([]);
+  // const [quantity, setQuantity] = useState(0);
   const isFocused = useIsFocused();
-  const navigation = useNavigation(); // Initialize the navigation object
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetch(baseUrl + 'menu/getAll')
       .then((response) => response.json())
-      .then((json) => setMenuItems(json))
+      .then((json) => {
+        const menuItemsWithQuantities = json.map(item => {
+          const cartItem = cartItems.find((cartItem) => cartItem.id === item._id);
+          return { ...item, quantity: cartItem ? cartItem.quantity : 0 };
+        });
+        setMenuItems(menuItemsWithQuantities);
+        console.log(menuItems);
+      })
       .catch((error) => alert(error));
 
     // Fetch cart items from AsyncStorage when the component mounts
@@ -30,10 +38,6 @@ function Home() {
       })
       .catch((error) => console.error('Error retrieving cart data:', error));
   }, [isFocused]);
-
-
-  const filteredData = menuItems.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-
 
   const handleAddToCart = async (itemToAdd) => {
     try {
@@ -60,16 +64,28 @@ function Home() {
 
       await AsyncStorage.setItem('cartItems', JSON.stringify(cartItems));
       setCartItems(cartItems); // Update the state with the updated cart items
+
+      // Update menuItems state with the new quantities
+      const updatedMenuItems = menuItems.map((item) => {
+        const cartItem = cartItems.find((cartItem) => cartItem.id === item._id);
+        return { ...item, quantity: cartItem ? cartItem.quantity : 0 };
+      });
+      setMenuItems(updatedMenuItems);
     } catch (error) {
       console.error('Error retrieving/updating cart data:', error);
     }
   };
+
+  const filteredData = menuItems.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+
+  
   //list items body 
   const renderItem = ({ item }) => {
     // Check if the item exists in AsyncStorage cart
-    const cartItem = cartItems.find((cartItem) => cartItem.id === item._id);
-    const quantity = cartItem ? cartItem.quantity : 0;
-  
+      const cartItem = cartItems.find((cartItem) => cartItem.id === item._id);
+      const quantity=(cartItem ? cartItem.quantity : 0);
+
     return (
       <TouchableOpacity style={homeStyles.itemContainer}>
         <View style={{ width: '10%' }}>
@@ -108,7 +124,7 @@ function Home() {
     <ImageBackground source={require('../assets/img5.jpg')} resizeMode="cover" style={{ flex: 1 }}>
       <SafeAreaView>
         {/* Add a text input for search */}
-        <View style={{ flexDirection: 'row',height:"8%"}}>
+        <View style={{ flexDirection: 'row', height: "8%" }}>
           <TextInput
             value={searchQuery}
             onChangeText={(text) => setSearchQuery(text)}
@@ -145,7 +161,7 @@ const homeStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     backgroundColor: "#dff",
-    marginTop:0,
+    marginTop: 0,
     marginHorizontal: "5%",
     borderRadius: 10,
     opacity: 0.8,

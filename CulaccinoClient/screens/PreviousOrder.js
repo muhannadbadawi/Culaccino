@@ -16,7 +16,10 @@ function PreviousOrder() {
   const [customerId, setCustomerId] = useState('');
   const [isItemsVisible, setIsItemsVisible] = useState(false);
   const [itemNames, setItemNames] = useState({});
-  const [itemPrice, setItemPrice] = useState({});
+  const [itemRatings, setItemRatings] = useState({});
+
+
+
 
 
   const isFocused = useIsFocused();
@@ -74,6 +77,35 @@ function PreviousOrder() {
 
   }, [isFocused, customerId, items]);
 
+  const showStars = (itemId, numOfStars) => {
+    setItemRatings((prevRatings) => ({
+      ...prevRatings,
+      [itemId]: numOfStars,
+    }));
+  };
+  const submitItemRatings = (orderId) => {
+    // Prepare the ratings data to send to the server
+    const ratingsData = {
+      orderId,
+      ratings: itemRatings,
+    };
+
+    // Make a POST request to send the ratings to the server
+    fetch(baseUrl + "order/submitRatings", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(ratingsData),
+    })
+      .then(response => response.json())
+      .then(responseData => {
+        // Handle the response from the server, if needed
+        console.log("Ratings submitted successfully:", responseData);
+      })
+      .catch(error => console.error('Error submitting ratings:', error));
+  };
+
   const renderOrder = ({ item }) => {
     // Parse the createdAt date string into a Date object
     const createdAtDate = new Date(item.createdAt);
@@ -100,20 +132,22 @@ function PreviousOrder() {
       </SafeAreaView>
     )
   };
+  const renderItems = ({ item, showStars }) => {
+    const itemId = item.itemId;
 
-  const renderItems = ({ item }) => {
+    const userRating = itemRatings[itemId] || 0;
+
     return (
       <SafeAreaView style={{ flexDirection: 'row' }}>
-        <View style={{marginVertical: "10%", width: '60%' }}>
-          <Text style={{ fontSize: 20,  color: 'green' }}>{itemNames[item.itemId]}</Text>
+        <View style={{ marginVertical: "10%", width: '60%' }}>
+          <Text style={{ fontSize: 20, color: 'green' }}>{itemNames[item.itemId]}</Text>
         </View>
-        <View style={{flexDirection: 'row', marginVertical: "10%",width: '40%' }}>
-        <Icon name="star" style={{fontSize: 25}} color="white" />
-        <Icon name="star" style={{fontSize: 25}} color="white" />
-        <Icon name="star" style={{fontSize: 25}} color="white" />
-        <Icon name="star" style={{fontSize: 25}} color="white" />
-        <Icon name="star" style={{fontSize: 25}} color="white" />
-
+        <View style={{ flexDirection: 'row', marginVertical: "10%", width: '40%' }}>
+          <Icon name="star" style={{ fontSize: 25, color: userRating >= 1 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 1)} />
+          <Icon name="star" style={{ fontSize: 25, color: userRating >= 2 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 2)} />
+          <Icon name="star" style={{ fontSize: 25, color: userRating >= 3 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 3)} />
+          <Icon name="star" style={{ fontSize: 25, color: userRating >= 4 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 4)} />
+          <Icon name="star" style={{ fontSize: 25, color: userRating >= 5 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 5)} />
         </View>
       </SafeAreaView>
     );
@@ -137,9 +171,11 @@ function PreviousOrder() {
     setIsItemsVisible(true);
 
   };
-  const handleHideItemdModal = () => {
-    setIsItemsVisible(false)
-  }
+  const handleHideItemdModal = (orderId) => {
+    submitItemRatings(orderId);
+
+    setIsItemsVisible(false);
+  };
   return (
     <View>
       <FlatList
@@ -154,8 +190,11 @@ function PreviousOrder() {
             <FlatList
               data={items}
               keyExtractor={(items) => items._id}
-              renderItem={renderItems}
+              renderItem={({ item }) => renderItems({ item ,showStars})}
             />
+            <View style={previousOrderStyles.buttonContainer}>
+              <Button title="Submit" onPress={handleHideItemdModal} color="#2980B9" />
+            </View>
             <View style={previousOrderStyles.buttonContainer}>
               <Button title="Cancel" onPress={handleHideItemdModal} color="#E74C3C" />
             </View>
