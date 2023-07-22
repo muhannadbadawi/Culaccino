@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import md5 from 'md5';
 
-const baseUrl = "http://192.168.1.166:5000/api/";
+const baseUrl = "http://192.168.100.5:5000/api/";
 
 function Login() {
   const navigation = useNavigation();
@@ -65,7 +65,7 @@ function Login() {
 
       <SafeAreaView style={loginStyles.container}>
         <Text style={loginStyles.lable}>Email</Text>
-        <TextInput keyboardType='email-address' style={loginStyles.input} onChangeText={newText => setEmail(newText.toString())}>Yousef@yahoo.co</TextInput>
+        <TextInput keyboardType='email-address' style={loginStyles.input} onChangeText={newText => setEmail(newText.toString())}></TextInput>
 
         <Text style={loginStyles.lable}>Password</Text>
         <TextInput secureTextEntry={true} keyboardType='visible-password' style={loginStyles.input} onChangeText={newText => setPassword(md5(newText.toString()))}></TextInput>

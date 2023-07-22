@@ -1,11 +1,14 @@
 const { Order } = require('../models/Order');
 const { ItemsOrder } = require('../models/ItemsOrder');
 const { Menu } = require("../models/Menu")
+const { Customer } = require("../models/Customer")
+
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const { Rate } = require('../models/Rate');
-const nodmailer = require('nodemailer')
+const nodmailer = require('nodemailer');
+const e = require('express');
 const mailTransporter = nodmailer.createTransport({
     service: "gmail",
     auth: {
@@ -139,74 +142,77 @@ router.post("/", async (req, res) => {
  * @method POST
  */
 router.post("/update", async (req, res) => {
-    
-       
-        const details={
-            from:"culaccino70@gmail.com",
-            to:"muhannadbadawi43@gmail.com",
-            subject:"Test Subject",
-            text:"Thanks For Ratting"
-          }
-        const itemId = req.body.itemId;
-        const io={
-            itemId:req.body.itemId,
-            orderId:req.body.orderId
-        }
-        const item = await ItemsOrder.find(io);
-        if(!item.status){
-            try {
-               
-                const updatedItem = await ItemsOrder.updateOne(
-                    { itemId: req.body.itemId, orderId: req.body.orderId },
+    const orderId = req.body.orderId
+    const order = await Order.findById(orderId);
+    const customerId=order.customerId;
+    const customer = await Customer.findById(customerId);
+    const email=customer.email
+    const details = {
+        from: "culaccino70@gmail.com",
+        to: email,
+        subject: "Test Subject",
+        text: "Thanks For Ratting"
+    }
+    const itemId = req.body.itemId;
+    const io = {
+        itemId: req.body.itemId,
+        orderId: req.body.orderId
+    }
+    const item = await ItemsOrder.find(io);
+    if (!item.status) {
+        try {
+
+            const updatedItem = await ItemsOrder.updateOne(
+                { itemId: req.body.itemId, orderId: req.body.orderId },
+                {
+                    $set: {
+                        rate: parseInt(req.body.rate),
+                        status: true,
+                    },
+                }
+            );
+
+            const rate = await Rate.findOne({ itemId });
+            if (!rate) {
+                const newRate = new Rate(
+                    {
+                        itemId: req.body.itemId,
+                        ratersNumber: 1,
+                        totalrate: parseInt(req.body.rate)
+                    }
+                );
+                await newRate.save();
+            }
+            else {
+                const oldRate = await Rate.updateOne(
+                    { itemId: itemId },
                     {
                         $set: {
-                            rate: parseInt(req.body.rate),
-                            status: true,
+                            itemId: rate.itemId,
+                            ratersNumber: 1 + rate.ratersNumber,
+                            totalrate: parseInt(req.params.rate) + rate.totalrate
                         },
                     }
                 );
-        
-                const rate = await Rate.findOne({ itemId });
-                if (!rate) {
-                    const newRate = new Rate(
-                        {
-                            itemId: req.body.itemId,
-                            ratersNumber: 1,
-                            totalrate: parseInt(req.body.rate)
-                        }
-                    );
-                    await newRate.save();
+            }
+            mailTransporter.sendMail(details, (err) => {
+                if (err) {
+                    console.log("error" + err)
                 }
                 else {
-                    const oldRate = await Rate.updateOne(
-                        { itemId: itemId },
-                        {
-                            $set: {
-                                itemId: rate.itemId,
-                                ratersNumber: 1 + rate.ratersNumber,
-                                totalrate: parseInt(req.params.rate) + rate.totalrate
-                            },
-                        }
-                    );
+                    console.log("email has send")
                 }
-                mailTransporter.sendMail(details,(err)=>{
-                    if(err){
-                      console.log("error"+err)
-                    }
-                    else{
-                      console.log("email has send")
-                    }
-                  })
-                res.status(200).json(rate);
-            }
-            catch (error) {
-                console.log(error);
-                res.status(500).json("wrong");
-            }
+            })
+            res.status(200).json(rate);
         }
-        else{
-            res.status(404).json("is rate");
+        catch (error) {
+            console.log(error);
+            res.status(500).json("wrong");
         }
+    }
+    else {
+        res.status(404).json("is rate");
+    }
 });
 
 

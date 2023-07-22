@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 //Start Cart
 
-const baseUrl = "http://192.168.1.166:5000/api/";
+const baseUrl = "http://192.168.100.5:5000/api/";
 
 // Helper function to retrieve data from AsyncStorage
 const getDataFromAsyncStorage = async () => {

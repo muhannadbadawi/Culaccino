@@ -1,9 +1,9 @@
-import { Text, ImageBackground, TextInput, StyleSheet, Pressable } from 'react-native';
+import { Text, ImageBackground, TextInput, StyleSheet, Pressable, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from "@react-navigation/native";
 import md5 from 'md5';
 
-const baseUrl = "http://192.168.1.166:5000/api/";
+const baseUrl = "http://192.168.100.5:5000/api/";
 //Start Register
 function Register() {
     const navigation = useNavigation();
@@ -16,36 +16,54 @@ function Register() {
 
     const registerCusomer = () => {
         console.log("Loading ....");
-        if ({ password }.password == { confirmPassword }.confirmPassword) {
-            const postData = {
-                name: name,
-                phone: phone,
-                email: email,
-                password: password
-            };
-
-            fetch(baseUrl + "customer", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData) // Convert the data to JSON string
-            })
-                .then(response => response.json())
-                .then(responseData => {
-                    console.log("Done");
-                    navigation.navigate("Login")
-                })
-                .catch(error => {
-                    // Handle any errors
-                    console.log({ name });
-                    console.error(error);
-                });
-        } else {
-            console.log("confirmPassword != Password")
-            console.log({ confirmPassword }.confirmPassword + "sas" + { password }.password)
+        if (!name || !phone || !email || !password || !confirmPassword) {
+            console.log("All fields are required.");
+            Alert.alert("All fields are required.")
+            return;
         }
-    }
+
+        if (!/\S+@\S+\.\S+/.test(email)) {
+            console.log("Invalid email format.");
+            Alert.alert("Invalid email format.")
+            return;
+        }
+
+        if (phone && !/^\d{10}$/.test(phone)) {
+            console.log("Invalid phone number format. It should be 10 digits.");
+            Alert.alert("Invalid phone number format. It should be 10 digits.")
+            return;
+        }
+
+
+        if (password !== confirmPassword) {
+            console.log("Passwords do not match.");
+            Alert.alert("Passwords do not match.")
+            return;
+        }
+
+        const postData = {
+            name: name,
+            phone: phone,
+            email: email,
+            password: password
+        };
+
+        fetch(baseUrl + "customer", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(postData)
+        })
+        .then(response => response.json())
+        .then(responseData => {
+            console.log("Registration successful.");
+            navigation.navigate("Login");
+        })
+        .catch(error => {
+            console.error("Registration error:", error);
+        });
+    };
     return (
         <ImageBackground source={require('../assets/img1.jpg')} resizeMode="cover" style={registerStyles.container}>
             <Pressable style={registerStyles.container1}>
@@ -77,7 +95,7 @@ function Register() {
             </Pressable>
 
         </ImageBackground>
-    )
+    ) 
 }
 //End Register
 
