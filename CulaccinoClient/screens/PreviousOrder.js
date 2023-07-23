@@ -186,7 +186,6 @@ function PreviousOrder() {
   };
   return (
     <View style={previousOrderStyles.container}>
-    
       <FlatList
         data={orders}
         keyExtractor={(item) => item._id}
