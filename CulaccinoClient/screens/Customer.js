@@ -11,7 +11,7 @@ import PreviousOrder from './PreviousOrder';
 
 const Tab = createBottomTabNavigator();
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.189:5000/api/";
 
 //Start Customer
 function Customer() {

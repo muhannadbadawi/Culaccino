@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.189:5000/api/";
 
 //Start Home
 function Home() {
@@ -79,12 +79,12 @@ function Home() {
   const filteredData = menuItems.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
 
-  
+
   //list items body 
   const renderItem = ({ item }) => {
     // Check if the item exists in AsyncStorage cart
-      const cartItem = cartItems.find((cartItem) => cartItem.id === item._id);
-      const quantity=(cartItem ? cartItem.quantity : 0);
+    const cartItem = cartItems.find((cartItem) => cartItem.id === item._id);
+    const quantity = (cartItem ? cartItem.quantity : 0);
 
     return (
       <TouchableOpacity style={homeStyles.itemContainer}>

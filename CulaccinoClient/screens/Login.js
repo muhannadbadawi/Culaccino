@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import md5 from 'md5';
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.189:5000/api/";
 
 function Login() {
   const navigation = useNavigation();
@@ -48,7 +48,7 @@ function Login() {
           console.log("Login successful");
           navigation.navigate("Customer")
         }
-        else{
+        else {
           Alert.alert(responseData.message)
         }
 

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigation } from "@react-navigation/native";
 import md5 from 'md5';
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.189:5000/api/";
 //Start Register
 function Register() {
     const navigation = useNavigation();
@@ -12,7 +12,6 @@ function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-
 
     const registerCusomer = () => {
         console.log("Loading ....");
@@ -55,14 +54,14 @@ function Register() {
             },
             body: JSON.stringify(postData)
         })
-        .then(response => response.json())
-        .then(responseData => {
-            console.log("Registration successful.");
-            navigation.navigate("Login");
-        })
-        .catch(error => {
-            console.error("Registration error:", error);
-        });
+            .then(response => response.json())
+            .then(responseData => {
+                console.log("Registration successful.");
+                navigation.navigate("Login");
+            })
+            .catch(error => {
+                console.error("Registration error:", error);
+            });
     };
     return (
         <ImageBackground source={require('../assets/img1.jpg')} resizeMode="cover" style={registerStyles.container}>
@@ -95,7 +94,7 @@ function Register() {
             </Pressable>
 
         </ImageBackground>
-    ) 
+    )
 }
 //End Register
 

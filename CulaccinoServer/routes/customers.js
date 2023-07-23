@@ -146,6 +146,9 @@ router.put("/update/:id", async (req, res) => {
     }
 
 });
+
+
+
 /**
  * @desc Update an Item
  * @route /api/customer/updatePassword/:id

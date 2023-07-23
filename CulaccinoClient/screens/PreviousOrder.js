@@ -6,7 +6,7 @@ import { useIsFocused } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.189:5000/api/";
 
 
 
@@ -83,16 +83,19 @@ function PreviousOrder() {
       [itemId]: numOfStars,
     }));
   };
-  const submitItemRating = async() => {
+  const submitItemRating = async () => {
 
     try {
+      // Loop through each element in the items array
       for (const element of items) {
+        // Prepare the data to be sent in the request
         const ratingsData = {
           itemId: element.itemId,
           orderId: element.orderId,
           rate: itemRatings[element.itemId]
         };
-  
+
+        // Send a POST request to the server
         const response = await fetch(baseUrl + "order/update", {
           method: 'POST',
           headers: {
@@ -100,16 +103,18 @@ function PreviousOrder() {
           },
           body: JSON.stringify(ratingsData),
         });
-  
+
+        // Check if the response is not successful
         if (!response.ok) {
           // Handle non-successful response (e.g., server error, not found, etc.)
           throw new Error('Failed to submit item rating');
         }
-      }
-  
+      };
+
       // All requests completed successfully, hide the modal
-      handleHideItemdModal();
+      handleHideItemModal();
     } catch (error) {
+      // Log the error to the console
       console.error('Error submitting item ratings:', error);
       // Handle the error as needed (e.g., show an error message to the user)
     }

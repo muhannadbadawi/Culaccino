@@ -29,6 +29,14 @@ const CustomerSchema =new mongoose.Schema({
         minlength:1,
         maxlength:500
     },
+    verificationToken: {
+      type: String, 
+      default: null, 
+    },
+    isVerified: {
+      type: Boolean, 
+      default: false,
+    },
     
 
 },

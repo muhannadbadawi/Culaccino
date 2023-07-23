@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 //Start Cart
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.189:5000/api/";
 
 // Helper function to retrieve data from AsyncStorage
 const getDataFromAsyncStorage = async () => {
@@ -90,8 +90,8 @@ function Cart() {
       const updatedData = [...data];
       updatedData[existingItems].quantity += 1;
       setData(updatedData);
-      saveDataToAsyncStorage("cartItems",updatedData); // Save the updated data to AsyncStorage
-    } 
+      saveDataToAsyncStorage("cartItems", updatedData); // Save the updated data to AsyncStorage
+    }
   };
 
   // Function to handle decrementing the quantity of an item in the cart
@@ -110,11 +110,13 @@ function Cart() {
       }
 
       setData(updatedData);
-      saveDataToAsyncStorage("cartItems",updatedData); // Save the updated data to AsyncStorage
+      saveDataToAsyncStorage("cartItems", updatedData); // Save the updated data to AsyncStorage
     }
   };
 
   const totalPrice = data.reduce((total, item) => total + item.price * item.quantity, 0);
+
+
   const checkout = async () => {
     const items = JSON.parse(await AsyncStorage.getItem('cartItems'));
     fetch(baseUrl + "order", {
@@ -129,7 +131,7 @@ function Cart() {
         const updatedData = [...data];
         updatedData.splice(0, updatedData.length);
         setData([]); // Empty the cart items state
-        saveDataToAsyncStorage("cartItems",updatedData);
+        saveDataToAsyncStorage("cartItems", updatedData);
         Alert.alert("Thank you for ordering from culacccino Please rate the order")
       })
       .catch((error) => {

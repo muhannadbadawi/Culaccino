@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 import md5 from 'md5';
 
-const baseUrl = "http://192.168.100.5:5000/api/";
+const baseUrl = "http://192.168.1.189:5000/api/";
 
 const Profile = () => {
     const [idShare, setIdShare] = useState('');
@@ -57,31 +57,31 @@ const Profile = () => {
         setInfoModalVisible(false);
     };
     const handleInfoChange = () => {
-            const postData = {
-                "name": nameShare,
-                "email": emailShare,
-                "phone": phoneShare,
-                password: md5(oldPassword),
-            };
-            fetch(baseUrl + "customer/update/" + idShare, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData) // Convert the data to JSON string
+        const postData = {
+            "name": nameShare,
+            "email": emailShare,
+            "phone": phoneShare,
+            password: md5(oldPassword),
+        };
+        fetch(baseUrl + "customer/update/" + idShare, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(postData) // Convert the data to JSON string
+        })
+            .then(response => response.json())
+            .then(responseData => {
+                // Handle the response data
+                if (responseData.message === "changed successfully!") {
+                    alert(responseData.message);
+                    handleHideInfoModal();
+                    navigation.navigate('Profile');
+                }
+                else {
+                    alert(responseData.message);
+                }
             })
-                .then(response => response.json())
-                .then(responseData => {
-                    // Handle the response data
-                    if (responseData.message === "changed successfully!") {
-                        alert(responseData.message);
-                        handleHideInfoModal();
-                        navigation.navigate('Profile');
-                    }
-                    else {
-                        alert(responseData.message);
-                    }
-                })
     };
     const handlePasswordChange = () => {
         if (newPassword === confirmPassword) {
