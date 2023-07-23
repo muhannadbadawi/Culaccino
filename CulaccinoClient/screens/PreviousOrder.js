@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, FlatList, Modal, Button, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, Modal, Button, TouchableOpacity, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -122,64 +122,44 @@ function PreviousOrder() {
   };
 
   const renderOrder = ({ item }) => {
-    // Parse the createdAt date string into a Date object
     const createdAtDate = new Date(item.createdAt);
-
-    // Get the individual date components (day, month, year, and time)
-    const day = createdAtDate.getDate();
-    const month = createdAtDate.getMonth() + 1; // Months are zero-based
-    const year = createdAtDate.getFullYear();
-    const time = createdAtDate.toLocaleTimeString();
+    const formattedDate = `${createdAtDate.getDate()}/${createdAtDate.getMonth() + 1}/${createdAtDate.getFullYear()}`;
 
     return (
       <SafeAreaView>
-        <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => handleShowItemdModal(item._id)}>
-          <View style={{ width: "50%" }}>
-            <Text style={{ fontSize: 18, color: "green" }}>{item.totalPrice} JOD</Text>
+        <TouchableOpacity style={previousOrderStyles.orderCard} onPress={() => handleShowItemdModal(item._id)}>
+          <View>
+            <Text style={previousOrderStyles.orderPrice}>{item.totalPrice} JOD</Text>
+            <Text style={previousOrderStyles.orderDate}>{formattedDate}</Text>
           </View>
-          <View style={{ width: "50%" }}>
-            {/* Display the formatted date */}
-            <Text style={previousOrderStyles.textItem}>
-              {day}/{month}/{year} {time}
-            </Text>
-          </View>
+          <Icon name="chevron-right" size={24} color="#333" />
         </TouchableOpacity>
       </SafeAreaView>
     )
   };
   const renderItems = ({ item, showStars }) => {
-    const itemId = item.itemId;
-
-    const userRating = itemRatings[itemId] || 0;
+    // ... Your existing code ...
 
     return (
-      <SafeAreaView style={previousOrderStyles.itemContainer}>
-        <View style={previousOrderStyles.itemInfoContainer}>
-          <Text style={previousOrderStyles.itemName}>{itemNames[item.itemId]}</Text>
-          <Image
-            source={{ uri: item.imageUrl }}
-            style={previousOrderStyles.itemImage}
-            resizeMode="cover"
-          />
-        </View>
-        <View style={previousOrderStyles.ratingContainer}>
-          <TouchableOpacity onPress={() => showStars(itemId, 1)}>
-            <Icon name={userRating >= 1 ? "star" : "star-border"} size={24} color="gold" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => showStars(itemId, 2)}>
-            <Icon name={userRating >= 2 ? "star" : "star-border"} size={24} color="gold" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => showStars(itemId, 3)}>
-            <Icon name={userRating >= 3 ? "star" : "star-border"} size={24} color="gold" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => showStars(itemId, 4)}>
-            <Icon name={userRating >= 4 ? "star" : "star-border"} size={24} color="gold" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => showStars(itemId, 5)}>
-            <Icon name={userRating >= 5 ? "star" : "star-border"} size={24} color="gold" />
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+         <SafeAreaView style={previousOrderStyles.itemCard}>
+         {/* Display item image and info */}
+         <View style={previousOrderStyles.itemInfoContainer}>
+           <Text style={previousOrderStyles.itemName}>{itemNames[item.itemId]}</Text>
+         </View>
+         {/* Display item rating stars */}
+         <View style={previousOrderStyles.ratingContainer}>
+           {[1, 2, 3, 4, 5].map((numOfStars) => (
+             <TouchableOpacity key={numOfStars} onPress={() => showStars(itemId, numOfStars)}>
+               <Icon
+                 name={userRating >= numOfStars ? "star" : "star-border"}
+                 size={24}
+                 color="gold"
+                 style={previousOrderStyles.starIcon}
+               />
+             </TouchableOpacity>
+           ))}
+         </View>
+       </SafeAreaView>
     );
   };
   const handleShowItemdModal = (orderId) => {
@@ -206,6 +186,7 @@ function PreviousOrder() {
   };
   return (
     <View style={previousOrderStyles.container}>
+    
       <FlatList
         data={orders}
         keyExtractor={(item) => item._id}
@@ -297,11 +278,6 @@ const previousOrderStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 10,
-  },
-  itemImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
   },
   ratingContainer: {
     flexDirection: 'row',
