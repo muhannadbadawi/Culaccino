@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, Modal, Button, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, Modal, Button, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -153,16 +153,31 @@ function PreviousOrder() {
     const userRating = itemRatings[itemId] || 0;
 
     return (
-      <SafeAreaView style={{ flexDirection: 'row' }}>
-        <View style={{ marginVertical: "10%", width: '60%' }}>
-          <Text style={{ fontSize: 20, color: 'green' }}>{itemNames[item.itemId]}</Text>
+      <SafeAreaView style={previousOrderStyles.itemContainer}>
+        <View style={previousOrderStyles.itemInfoContainer}>
+          <Text style={previousOrderStyles.itemName}>{itemNames[item.itemId]}</Text>
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={previousOrderStyles.itemImage}
+            resizeMode="cover"
+          />
         </View>
-        <View style={{ flexDirection: 'row', marginVertical: "10%", width: '40%' }}>
-          <Icon name="star" style={{ fontSize: 25, color: userRating >= 1 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 1)} />
-          <Icon name="star" style={{ fontSize: 25, color: userRating >= 2 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 2)} />
-          <Icon name="star" style={{ fontSize: 25, color: userRating >= 3 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 3)} />
-          <Icon name="star" style={{ fontSize: 25, color: userRating >= 4 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 4)} />
-          <Icon name="star" style={{ fontSize: 25, color: userRating >= 5 ? "rgb(255,255,0)" : "white" }} onPress={() => showStars(itemId, 5)} />
+        <View style={previousOrderStyles.ratingContainer}>
+          <TouchableOpacity onPress={() => showStars(itemId, 1)}>
+            <Icon name={userRating >= 1 ? "star" : "star-border"} size={24} color="gold" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => showStars(itemId, 2)}>
+            <Icon name={userRating >= 2 ? "star" : "star-border"} size={24} color="gold" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => showStars(itemId, 3)}>
+            <Icon name={userRating >= 3 ? "star" : "star-border"} size={24} color="gold" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => showStars(itemId, 4)}>
+            <Icon name={userRating >= 4 ? "star" : "star-border"} size={24} color="gold" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => showStars(itemId, 5)}>
+            <Icon name={userRating >= 5 ? "star" : "star-border"} size={24} color="gold" />
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -190,7 +205,7 @@ function PreviousOrder() {
     setIsItemsVisible(false);
   };
   return (
-    <View>
+    <View style={previousOrderStyles.container}>
       <FlatList
         data={orders}
         keyExtractor={(item) => item._id}
@@ -198,66 +213,52 @@ function PreviousOrder() {
       />
       <Modal animationType="slide" transparent={true} visible={isItemsVisible}>
         <View style={previousOrderStyles.modalContainer}>
-          <View style={previousOrderStyles.modalInfoContent}>
-            <Text style={previousOrderStyles.modalTitle}>List Of Items in your order</Text>
+          <View style={previousOrderStyles.modalContent}>
+            <Text style={previousOrderStyles.modalTitle}>List Of Items in Your Order</Text>
             <FlatList
               data={items}
-              keyExtractor={(items) => items._id}
-              renderItem={({ item }) => renderItems({ item, showStars })}
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => renderItems({ item, showStars })} // Ensure showStars is passed here
             />
             <View style={previousOrderStyles.buttonContainer}>
-              <Button title="Submit" onPress={submitItemRating} color="#2980B9" />
-            </View>
-            <View style={previousOrderStyles.buttonContainer}>
-              <Button title="Cancel" onPress={handleHideItemdModal} color="#E74C3C" />
+              <TouchableOpacity onPress={submitItemRating} style={previousOrderStyles.submitButton}>
+                <Icon name="check" size={24} color="white" />
+                <Text style={previousOrderStyles.buttonText}>Submit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleHideItemdModal} style={previousOrderStyles.cancelButton}>
+                <Icon name="close" size={24} color="white" />
+                <Text style={previousOrderStyles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
     </View>
-
   );
 }
 //Start cartStyles
 const previousOrderStyles = StyleSheet.create({
   container: {
-    flexDirection: 'row', // Arrange items horizontally
-    justifyContent: 'center', // Center items horizontally
-    height: "100%",
-    marginTop: 20,
-    margin: "3%",
-    backgroundColor: "#dff",
+    flex: 1,
+    margin: 10,
+  },
+  orderCard: {
+    backgroundColor: '#f5f5f5',
+    padding: 16,
     borderRadius: 10,
-    opacity: 0.8,
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    elevation: 2,
   },
-  menuContainer: {
-    flex: 1, // Each button container should take equal space
-    marginHorizontal: 5,
-    width: "100%",
-    height: "100%",
+  orderPrice: {
+    fontSize: 18,
+    color: 'green',
+    fontWeight: 'bold',
   },
-  quantityButton: {
-    fontSize: 28,
-    position: "relative",
-    right: 0,
-  },
-  textItem: {
-    marginLeft: "3%",
-    fontWeight: "400",
-    fontSize: 18
-  },
-  buttonText: {
-    color: 'black',
-    textAlign: 'center',
-    fontSize: 22,
-    fontWeight: "400",
-  },
-  textHeader: {
-    fontWeight: "bold",
-    fontSize: 17,
-    marginHorizontal: "14%",
-    marginVertical: "5%",
-    textAlign: "left"
+  orderDate: {
+    fontSize: 16,
   },
   modalContainer: {
     flex: 1,
@@ -265,29 +266,77 @@ const previousOrderStyles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalInfoContent: {
-    backgroundColor: '#ddd',
-    padding: "5%",
+  modalContent: {
+    backgroundColor: '#fff',
     borderRadius: 20,
+    padding: 20,
     width: '90%',
-    height: "90%",
   },
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: "10%",
+    marginBottom: 20,
     textAlign: 'center',
     color: '#333',
   },
-  label: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: "2%",
+  itemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    elevation: 2,
+  },
+  itemInfoContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  itemName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  itemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  starIcon: {
+    marginHorizontal: 2,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: "7%",
+    marginTop: 20,
+  },
+  submitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2980B9',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E74C3C',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  buttonText: {
+    fontSize: 16,
+    color: 'white',
+    marginLeft: 8,
   },
 });
 //End cartStyles
